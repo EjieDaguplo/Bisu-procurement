@@ -2,10 +2,10 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus } from "lucide-react";
-import { PageWrapper } from "../../components/layout/PageWrapper";
-import { PRTable } from "../../components/pr/PRTable";
-import { api } from "../../lib/api";
-import { PurchaseRequest, PRStatus } from "../../types";
+import { PageWrapper } from "../../../src/components/layout/PageWrapper";
+import { PRTable } from "../../../src/components/pr/PRTable";
+import { api } from "../../../src/lib/api";
+import { PurchaseRequest, PRStatus } from "../../../src/types";
 
 const STATUSES: PRStatus[] = [
   "DRAFT",

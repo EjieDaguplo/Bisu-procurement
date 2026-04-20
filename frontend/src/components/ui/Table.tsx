@@ -23,35 +23,85 @@ export function Table<T extends { id: number | string }>({
   onRowClick,
 }: TableProps<T>) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-gray-200">
-      <table className="w-full text-sm">
-        <thead className="bg-bisu-blue-DEFAULT text-white">
-          <tr>
+    <div
+      style={{
+        overflowX: "auto",
+        borderRadius: "12px",
+        border: "1px solid #e5e7eb",
+      }}
+    >
+      <table
+        style={{
+          width: "100%",
+          borderCollapse: "collapse",
+          fontSize: "0.875rem",
+        }}
+      >
+        {/* Header */}
+        <thead>
+          <tr style={{ backgroundColor: "#1A3A8F" }}>
             {columns.map((col) => (
               <th
                 key={col.key}
-                className={`text-left px-4 py-3 font-semibold ${col.className || ""}`}
+                style={{
+                  textAlign: "left",
+                  padding: "12px 16px",
+                  fontWeight: 600,
+                  fontSize: "0.8125rem",
+                  color: "#ffffff",
+                  whiteSpace: "nowrap",
+                  letterSpacing: "0.01em",
+                }}
               >
                 {col.header}
               </th>
             ))}
           </tr>
         </thead>
+
+        {/* Body */}
         <tbody>
           {loading ? (
             <tr>
               <td
                 colSpan={columns.length}
-                className="text-center py-8 text-gray-400"
+                style={{
+                  textAlign: "center",
+                  padding: "32px",
+                  color: "#9ca3af",
+                }}
               >
-                Loading...
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: "8px",
+                  }}
+                >
+                  <div
+                    style={{
+                      width: "16px",
+                      height: "16px",
+                      border: "2px solid #e5e7eb",
+                      borderTopColor: "#1A3A8F",
+                      borderRadius: "50%",
+                      animation: "spin 0.8s linear infinite",
+                    }}
+                  />
+                  Loading...
+                </div>
               </td>
             </tr>
           ) : data.length === 0 ? (
             <tr>
               <td
                 colSpan={columns.length}
-                className="text-center py-8 text-gray-400"
+                style={{
+                  textAlign: "center",
+                  padding: "32px",
+                  color: "#9ca3af",
+                }}
               >
                 {emptyText}
               </td>
@@ -60,13 +110,30 @@ export function Table<T extends { id: number | string }>({
             data.map((row, i) => (
               <tr
                 key={row.id}
-                className={`border-t border-gray-100 ${i % 2 === 0 ? "bg-white" : "bg-bisu-offwhite"} ${onRowClick ? "cursor-pointer hover:bg-bisu-yellow-light/20 transition-colors" : ""}`}
                 onClick={() => onRowClick?.(row)}
+                style={{
+                  backgroundColor: i % 2 === 0 ? "#ffffff" : "#f9fafb",
+                  borderTop: "1px solid #f3f4f6",
+                  cursor: onRowClick ? "pointer" : "default",
+                  transition: "background-color 0.15s",
+                }}
+                onMouseEnter={(e) => {
+                  if (onRowClick)
+                    e.currentTarget.style.backgroundColor = "#eff6ff";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor =
+                    i % 2 === 0 ? "#ffffff" : "#f9fafb";
+                }}
               >
                 {columns.map((col) => (
                   <td
                     key={col.key}
-                    className={`px-4 py-3 ${col.className || ""}`}
+                    style={{
+                      padding: "12px 16px",
+                      color: "#1f2937",
+                      verticalAlign: "middle",
+                    }}
                   >
                     {col.render
                       ? col.render(row)
@@ -78,6 +145,9 @@ export function Table<T extends { id: number | string }>({
           )}
         </tbody>
       </table>
+
+      {/* Spinner keyframe */}
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>
   );
 }

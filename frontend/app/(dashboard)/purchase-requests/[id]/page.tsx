@@ -1,10 +1,13 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { PageWrapper } from "../../../components/layout/PageWrapper";
-import { StatusBadge, PriorityBadge } from "../../../components/ui/Badge";
-import { api } from "../../../lib/api";
-import { PurchaseRequest, TrackingLog } from "../../../types";
+import { PageWrapper } from "../../../../src/components/layout/PageWrapper";
+import {
+  StatusBadge,
+  PriorityBadge,
+} from "../../../../src/components/ui/Badge";
+import { api } from "../../../../src/lib/api";
+import { PurchaseRequest, TrackingLog } from "../../../../src/types";
 import { ArrowLeft, Send, XCircle } from "lucide-react";
 import Link from "next/link";
 

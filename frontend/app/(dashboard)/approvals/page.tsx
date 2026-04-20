@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { PageWrapper } from "../../components/layout/PageWrapper";
-import { StatusBadge } from "../../components/ui/Badge";
-import { api } from "../../lib/api";
-import { Modal } from "../../components/ui/Modal";
+import { PageWrapper } from "../../../src/components/layout/PageWrapper";
+import { StatusBadge } from "../../../src/components/ui/Badge";
+import { api } from "../../../src/lib/api";
+import { Modal } from "../../../src/components/ui/Modal";
 
 interface Approval {
   id: number;

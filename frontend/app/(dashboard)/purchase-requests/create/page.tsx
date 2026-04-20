@@ -1,10 +1,10 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { PageWrapper } from "../../../components/layout/PageWrapper";
-import { PRForm } from "../../../components/pr/PRForm";
-import { api } from "../../../lib/api";
-import { Department } from "../../../types";
+import { PageWrapper } from "../../../../src/components/layout/PageWrapper";
+import { PRForm } from "../../../../src/components/pr/PRForm";
+import { api } from "../../../../src/lib/api";
+import { Department } from "../../../../src/types";
 
 export default function CreatePRPage() {
   const router = useRouter();

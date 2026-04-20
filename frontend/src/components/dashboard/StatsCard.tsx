@@ -9,28 +9,12 @@ interface StatsCardProps {
   subtitle?: string;
 }
 
-const colors = {
-  blue: {
-    bg: "bg-bisu-blue-light/10",
-    icon: "text-bisu-blue-DEFAULT",
-    border: "border-bisu-blue-light/30",
-  },
-  yellow: {
-    bg: "bg-bisu-yellow-light/20",
-    icon: "text-bisu-gold",
-    border: "border-bisu-yellow-DEFAULT/30",
-  },
-  purple: {
-    bg: "bg-bisu-purple-light/10",
-    icon: "text-bisu-purple-DEFAULT",
-    border: "border-bisu-purple-light/30",
-  },
-  green: {
-    bg: "bg-green-50",
-    icon: "text-green-600",
-    border: "border-green-200",
-  },
-  red: { bg: "bg-red-50", icon: "text-red-500", border: "border-red-200" },
+const palette = {
+  blue: { bg: "#eff6ff", icon: "#1A3A8F", border: "#bfdbfe" },
+  yellow: { bg: "#fffbeb", icon: "#E8A000", border: "#fde68a" },
+  purple: { bg: "#f5f3ff", icon: "#5B2D8E", border: "#ddd6fe" },
+  green: { bg: "#f0fdf4", icon: "#15803d", border: "#bbf7d0" },
+  red: { bg: "#fef2f2", icon: "#b91c1c", border: "#fecaca" },
 };
 
 export const StatsCard = ({
@@ -40,20 +24,66 @@ export const StatsCard = ({
   color,
   subtitle,
 }: StatsCardProps) => {
-  const c = colors[color];
+  const c = palette[color];
   return (
     <div
-      className={`bg-white rounded-xl p-5 border shadow-card flex items-center gap-4 ${c.border}`}
+      style={{
+        backgroundColor: "#ffffff",
+        borderRadius: "12px",
+        padding: "20px",
+        border: `1px solid ${c.border}`,
+        boxShadow: "0 2px 12px rgba(26,58,143,0.08)",
+        display: "flex",
+        alignItems: "center",
+        gap: "16px",
+      }}
     >
       <div
-        className={`w-12 h-12 rounded-xl flex items-center justify-center ${c.bg} flex-shrink-0`}
+        style={{
+          width: "48px",
+          height: "48px",
+          borderRadius: "12px",
+          backgroundColor: c.bg,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}
       >
-        <Icon size={24} className={c.icon} />
+        <Icon size={24} color={c.icon} />
       </div>
       <div>
-        <p className="text-sm text-gray-500 font-medium">{title}</p>
-        <p className="text-2xl font-bold text-gray-800">{value}</p>
-        {subtitle && <p className="text-xs text-gray-400 mt-0.5">{subtitle}</p>}
+        <p
+          style={{
+            fontSize: "0.875rem",
+            color: "#6b7280",
+            fontWeight: 500,
+            margin: "0 0 2px 0",
+          }}
+        >
+          {title}
+        </p>
+        <p
+          style={{
+            fontSize: "1.5rem",
+            fontWeight: 700,
+            color: "#1f2937",
+            margin: 0,
+          }}
+        >
+          {value}
+        </p>
+        {subtitle && (
+          <p
+            style={{
+              fontSize: "0.75rem",
+              color: "#9ca3af",
+              margin: "2px 0 0 0",
+            }}
+          >
+            {subtitle}
+          </p>
+        )}
       </div>
     </div>
   );

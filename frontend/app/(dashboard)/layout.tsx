@@ -1,9 +1,9 @@
 "use client";
 import React, { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Sidebar } from "../components/layout/Sidebar";
-import { Navbar } from "../components/layout/Navbar";
-import { isLoggedIn } from "../lib/auth";
+import { Sidebar } from "../../src/components/layout/Sidebar";
+import { Navbar } from "../../src/components/layout/Navbar";
+import { isLoggedIn } from "../../src/lib/auth";
 
 export default function DashboardLayout({
   children,

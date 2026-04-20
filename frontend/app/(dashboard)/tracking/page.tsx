@@ -1,8 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { PageWrapper } from "../../components/layout/PageWrapper";
-import { api } from "../../lib/api";
-import { TrackingLog } from "../../types";
+import { PageWrapper } from "../../../src/components/layout/PageWrapper";
+import { api } from "../../../src/lib/api";
+import { TrackingLog } from "../../../src/types";
 import { MapPin } from "lucide-react";
 
 export default function TrackingPage() {
