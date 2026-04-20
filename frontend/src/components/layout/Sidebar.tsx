@@ -77,61 +77,26 @@ export const Sidebar = () => {
   );
 
   return (
-    <aside
-      style={{
-        backgroundColor: "#1A3A8F",
-        minHeight: "100vh",
-        width: "256px",
-        display: "flex",
-        flexDirection: "column",
-        boxShadow: "0 2px 16px rgba(26,58,143,0.12)",
-      }}
-    >
+    <aside className="sticky top-0 h-screen w-64 shrink-0 flex flex-col overflow-hidden shadow-[0_2px_16px_rgba(26,58,143,0.12)] bg-[#1A3A8F]">
       {/* Logo */}
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "8px",
-          padding: "24px",
-          borderBottom: "1px solid rgba(255,255,255,0.10)",
-        }}
-      >
+      <div className="flex flex-col items-center gap-2 px-6 py-6 border-b border-white/10">
         <Image
           src="/bisuLogo.png"
           alt="BISU Logo"
           width={60}
           height={60}
-          style={{ borderRadius: "50%" }}
+          className="rounded-full"
         />
-        <div style={{ textAlign: "center" }}>
-          <p
-            style={{
-              color: "#F5C400",
-              fontWeight: 700,
-              fontSize: "0.875rem",
-              lineHeight: 1.3,
-            }}
-          >
+        <div className="text-center">
+          <p className="text-[#F5C400] font-bold text-sm leading-snug">
             BISU – Bilar
           </p>
-          <p style={{ color: "rgba(255,255,255,0.60)", fontSize: "0.75rem" }}>
-            Procurement MIS
-          </p>
+          <p className="text-white/60 text-xs">Procurement MIS</p>
         </div>
       </div>
 
       {/* Nav */}
-      <nav
-        style={{
-          flex: 1,
-          padding: "12px",
-          display: "flex",
-          flexDirection: "column",
-          gap: "4px",
-        }}
-      >
+      <nav className="flex-1 p-3 flex flex-col gap-1 overflow-hidden">
         {filtered.map((item) => {
           const active =
             pathname === item.href || pathname.startsWith(item.href + "/");
@@ -139,19 +104,7 @@ export const Sidebar = () => {
             <Link
               key={item.href}
               href={item.href}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                padding: "10px 16px",
-                borderRadius: "8px",
-                backgroundColor: "#F5C400",
-                color: "#0F2460",
-                fontWeight: 600,
-                fontSize: "0.875rem",
-                textDecoration: "none",
-                boxShadow: "0 1px 4px rgba(0,0,0,0.12)",
-              }}
+              className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-[#F5C400] text-[#0F2460] font-semibold text-sm no-underline shadow-sm"
             >
               {item.icon}
               {item.label}
@@ -160,27 +113,7 @@ export const Sidebar = () => {
             <Link
               key={item.href}
               href={item.href}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                padding: "10px 16px",
-                borderRadius: "8px",
-                color: "rgba(255,255,255,0.80)",
-                fontWeight: 500,
-                fontSize: "0.875rem",
-                textDecoration: "none",
-                transition: "all 0.15s",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor =
-                  "rgba(255,255,255,0.10)";
-                e.currentTarget.style.color = "#ffffff";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = "transparent";
-                e.currentTarget.style.color = "rgba(255,255,255,0.80)";
-              }}
+              className="flex items-center gap-3 px-4 py-2.5 rounded-lg text-white/80 font-medium text-sm no-underline transition-all duration-150 hover:bg-white/10 hover:text-white"
             >
               {item.icon}
               {item.label}
@@ -190,80 +123,22 @@ export const Sidebar = () => {
       </nav>
 
       {/* User + Logout */}
-      <div
-        style={{
-          padding: "16px",
-          borderTop: "1px solid rgba(255,255,255,0.10)",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px",
-            marginBottom: "8px",
-          }}
-        >
-          <div
-            style={{
-              width: "36px",
-              height: "36px",
-              borderRadius: "50%",
-              backgroundColor: "#F5C400",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#0F2460",
-              fontWeight: 700,
-              fontSize: "0.875rem",
-              flexShrink: 0,
-            }}
-          >
+      <div className="p-4 border-t border-white/10">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-9 h-9 rounded-full bg-[#F5C400] flex items-center justify-center text-[#0F2460] font-bold text-sm shrink-0">
             {user?.first_name?.[0]}
             {user?.last_name?.[0]}
           </div>
-          <div style={{ minWidth: 0 }}>
-            <p
-              style={{
-                color: "#ffffff",
-                fontSize: "0.875rem",
-                fontWeight: 500,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
+          <div className="min-w-0">
+            <p className="text-white text-sm font-medium truncate">
               {user?.first_name} {user?.last_name}
             </p>
-            <p style={{ color: "rgba(255,255,255,0.50)", fontSize: "0.75rem" }}>
-              {user?.role}
-            </p>
+            <p className="text-white/50 text-xs">{user?.role}</p>
           </div>
         </div>
         <button
           onClick={logout}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "8px",
-            width: "100%",
-            padding: "8px 16px",
-            borderRadius: "8px",
-            color: "rgba(255,255,255,0.60)",
-            backgroundColor: "transparent",
-            border: "none",
-            cursor: "pointer",
-            fontSize: "0.875rem",
-            transition: "all 0.15s",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.backgroundColor = "rgba(239,68,68,0.20)";
-            e.currentTarget.style.color = "#fca5a5";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.backgroundColor = "transparent";
-            e.currentTarget.style.color = "rgba(255,255,255,0.60)";
-          }}
+          className="flex items-center gap-2 w-full px-4 py-2 rounded-lg text-white/60 bg-transparent border-none cursor-pointer text-sm transition-all duration-150 hover:bg-red-500/20 hover:text-red-300"
         >
           <LogOut size={16} /> Sign Out
         </button>
