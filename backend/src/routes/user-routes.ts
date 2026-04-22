@@ -6,6 +6,8 @@ import {
   updateUser,
   deleteUser,
 } from "../controllers/user-controller";
+import { getAllDepartments } from "../controllers/department-controller";
+import { getAllRoles } from "../controllers/role-controller";
 import { requireRole } from "../middleware/role-middleware";
 
 const router = Router();

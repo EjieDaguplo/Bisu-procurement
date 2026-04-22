@@ -1,174 +1,415 @@
+// this is having issue by fetching user FIX IT
 "use client";
 import React, { useEffect, useState } from "react";
-import { PageWrapper } from "../../../src/components/layout/PageWrapper";
-import { api } from "../../../src/lib/api";
-import { User } from "../../../src/types";
-import {
-  Users,
-  Hash,
-  Mail,
-  Briefcase,
-  Building2,
-  ShieldCheck,
-} from "lucide-react";
+import { PageWrapper } from "@/src/components/layout/PageWrapper";
+import { api } from "@/src/lib/api";
+import { UserModal } from "./UserModal";
+import { DeleteConfirmModal } from "./DeleteConfirmModal";
+import { Plus, Pencil, Trash2, Search } from "lucide-react";
+
+interface Department {
+  id: number;
+  name: string;
+  code: string;
+}
+
+interface Role {
+  id: number;
+  name: string;
+}
+
+interface UserRow {
+  id: number;
+  employee_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  is_active: boolean;
+  roles: Role;
+  departments: Department | null;
+}
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>([]);
+  const [users, setUsers] = useState<UserRow[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
+  const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<UserRow | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<UserRow | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      // Fetch users first — this is the critical call
+      const u = await api.get<UserRow[]>("/users");
+      setUsers(u);
+
+      // Derive departments and roles from users as fallback
+      const deptMap = new Map<number, Department>();
+      const roleMap = new Map<number, Role>();
+      u.forEach((user) => {
+        if (user.departments)
+          deptMap.set(user.departments.id, user.departments);
+        if (user.roles) roleMap.set(user.roles.id, user.roles);
+      });
+
+      // Try to fetch departments/roles separately — gracefully ignore failures
+      try {
+        const d = await api.get<Department[]>("/departments");
+        setDepartments(d);
+      } catch {
+        setDepartments(Array.from(deptMap.values()));
+      }
+
+      try {
+        const r = await api.get<Role[]>("/roles");
+        setRoles(r);
+      } catch {
+        setRoles(Array.from(roleMap.values()));
+      }
+    } catch (err) {
+      console.error("Failed to load users:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    api
-      .get<User[]>("/users")
-      .then(setUsers)
-      .finally(() => setLoading(false));
+    load();
   }, []);
 
-  const headers = [
-    { label: "Employee ID", icon: Hash },
-    { label: "Name", icon: Users },
-    { label: "Email", icon: Mail },
-    { label: "Role", icon: ShieldCheck },
-    { label: "Department", icon: Building2 },
-    { label: "Status", icon: Briefcase },
-  ];
+  const filtered = users.filter((u) =>
+    `${u.first_name} ${u.last_name} ${u.email} ${u.employee_id}`
+      .toLowerCase()
+      .includes(search.toLowerCase()),
+  );
+
+  const openCreate = () => {
+    setEditTarget(null);
+    setModalOpen(true);
+  };
+  const openEdit = (u: UserRow) => {
+    setEditTarget(u);
+    setModalOpen(true);
+  };
+
+  const handleSave = async (data: Record<string, unknown>) => {
+    setSaving(true);
+    try {
+      if (editTarget) {
+        await api.put(`/users/${editTarget.id}`, data);
+      } else {
+        await api.post("/users", data);
+      }
+      setModalOpen(false);
+      await load();
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/users/${deleteTarget.id}`);
+      setDeleteTarget(null);
+      await load();
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const roleColor: Record<string, { bg: string; color: string }> = {
+    ADMIN: { bg: "#ede9fe", color: "#6d28d9" },
+    APPROVER: { bg: "#dbeafe", color: "#1d4ed8" },
+    REQUESTER: { bg: "#dcfce7", color: "#15803d" },
+    PROCUREMENT_OFFICER: { bg: "#fef9c3", color: "#92400e" },
+    IT: { bg: "#f3f4f6", color: "#374151" },
+  };
 
   return (
-    <PageWrapper title="User Management">
-      <div className="card overflow-hidden p-0">
-        {/* Table header bar */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-              <Users size={16} className="text-bisu-blue" />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-bisu-blue leading-none">
-                System Users
-              </p>
-              <p className="text-xs text-gray-400 mt-0.5">
-                {users.length} total records
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-gradient-to-r from-bisu-blue to-bisu-purple">
-                {headers.map(({ label, icon: Icon }) => (
-                  <th key={label} className="text-left px-4 py-3">
-                    <div className="flex items-center gap-1.5">
-                      <Icon size={13} className="text-white/60" />
-                      <span className="text-xs font-bold text-white uppercase tracking-wider">
-                        {label}
-                      </span>
-                    </div>
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={6} className="text-center py-16">
-                    <div className="flex flex-col items-center gap-3">
-                      <div className="w-8 h-8 border-2 border-bisu-blue border-t-transparent rounded-full animate-spin" />
-                      <span className="text-sm text-gray-400 font-medium">
-                        Loading users...
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              ) : users.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="text-center py-16">
-                    <div className="flex flex-col items-center gap-2">
-                      <Users size={32} className="text-gray-200" />
-                      <span className="text-sm text-gray-400 font-medium">
-                        No users found
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
-                users.map((u, i) => {
-                  const user = u as User & {
-                    departments?: { name: string };
-                    is_active?: boolean;
-                  };
-                  return (
-                    <tr
-                      key={u.id}
-                      className={`border-t border-gray-50 hover:bg-blue-50/40 transition-colors ${
-                        i % 2 === 0 ? "bg-white" : "bg-gray-50/50"
-                      }`}
-                    >
-                      {/* Employee ID */}
-                      <td className="px-4 py-3">
-                        <span className="font-mono text-xs font-bold text-bisu-blue bg-blue-50 px-2 py-1 rounded-md">
-                          {u.employee_id}
-                        </span>
-                      </td>
-
-                      {/* Name */}
-                      <td className="px-4 py-3">
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-full bg-gradient-to-br from-bisu-blue to-bisu-purple flex items-center justify-center text-white text-[0.6rem] font-bold flex-shrink-0">
-                            {u.first_name?.[0]}
-                            {u.last_name?.[0]}
-                          </div>
-                          <span className="font-semibold text-gray-800">
-                            {u.first_name} {u.last_name}
-                          </span>
-                        </div>
-                      </td>
-
-                      {/* Email */}
-                      <td className="px-4 py-3 text-gray-500 text-xs">
-                        {u.email}
-                      </td>
-
-                      {/* Role */}
-                      <td className="px-4 py-3">
-                        <span className="text-xs px-2.5 py-1 bg-purple-50 text-bisu-purple border border-purple-100 rounded-full font-semibold">
-                          {u.role}
-                        </span>
-                      </td>
-
-                      {/* Department */}
-                      <td className="px-4 py-3 text-gray-500 text-xs">
-                        {user.departments?.name || (
-                          <span className="text-gray-300">—</span>
-                        )}
-                      </td>
-
-                      {/* Status */}
-                      <td className="px-4 py-3">
-                        <span
-                          className={`inline-flex items-center gap-1 text-xs px-2.5 py-1 rounded-full font-semibold ${
-                            user.is_active
-                              ? "bg-green-50 text-green-700 border border-green-100"
-                              : "bg-red-50 text-red-600 border border-red-100"
-                          }`}
-                        >
-                          <span
-                            className={`w-1.5 h-1.5 rounded-full ${
-                              user.is_active ? "bg-green-500" : "bg-red-400"
-                            }`}
-                          />
-                          {user.is_active ? "Active" : "Inactive"}
-                        </span>
-                      </td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+    <PageWrapper
+      title="User Management"
+      action={
+        <button
+          onClick={openCreate}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "8px",
+            backgroundColor: "#1A3A8F",
+            color: "#fff",
+            fontWeight: 600,
+            fontSize: "0.875rem",
+            padding: "10px 20px",
+            borderRadius: "8px",
+            border: "none",
+            cursor: "pointer",
+          }}
+        >
+          <Plus size={16} /> New User
+        </button>
+      }
+    >
+      {/* Search */}
+      <div
+        style={{
+          marginBottom: "16px",
+          position: "relative",
+          maxWidth: "320px",
+        }}
+      >
+        <Search
+          size={16}
+          style={{
+            position: "absolute",
+            left: "12px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            color: "#9ca3af",
+          }}
+        />
+        <input
+          placeholder="Search users..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "10px 16px 10px 36px",
+            border: "1px solid #d1d5db",
+            borderRadius: "8px",
+            fontSize: "0.875rem",
+            color: "#111827",
+            outline: "none",
+            boxSizing: "border-box",
+          }}
+        />
       </div>
+
+      {/* Table */}
+      <div
+        style={{
+          overflowX: "auto",
+          borderRadius: "12px",
+          border: "1px solid #e5e7eb",
+          backgroundColor: "#fff",
+        }}
+      >
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+            fontSize: "0.875rem",
+          }}
+        >
+          <thead>
+            <tr style={{ backgroundColor: "#1A3A8F" }}>
+              {[
+                "Employee ID",
+                "Name",
+                "Email",
+                "Role",
+                "Department",
+                "Status",
+                "Actions",
+              ].map((h) => (
+                <th
+                  key={h}
+                  style={{
+                    textAlign: "left",
+                    padding: "12px 16px",
+                    fontWeight: 600,
+                    color: "#fff",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {loading ? (
+              <tr>
+                <td
+                  colSpan={7}
+                  style={{
+                    textAlign: "center",
+                    padding: "32px",
+                    color: "#9ca3af",
+                  }}
+                >
+                  Loading...
+                </td>
+              </tr>
+            ) : filtered.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={7}
+                  style={{
+                    textAlign: "center",
+                    padding: "32px",
+                    color: "#9ca3af",
+                  }}
+                >
+                  No users found.
+                </td>
+              </tr>
+            ) : (
+              filtered.map((u, i) => {
+                const rc = roleColor[u.roles?.name] || {
+                  bg: "#f3f4f6",
+                  color: "#374151",
+                };
+                return (
+                  <tr
+                    key={u.id}
+                    style={{
+                      borderTop: "1px solid #f3f4f6",
+                      backgroundColor: i % 2 === 0 ? "#fff" : "#f9fafb",
+                    }}
+                  >
+                    <td
+                      style={{
+                        padding: "12px 16px",
+                        fontFamily: "monospace",
+                        fontWeight: 700,
+                        color: "#1A3A8F",
+                        fontSize: "0.75rem",
+                      }}
+                    >
+                      {u.employee_id}
+                    </td>
+                    <td
+                      style={{
+                        padding: "12px 16px",
+                        fontWeight: 500,
+                        color: "#1f2937",
+                      }}
+                    >
+                      {u.first_name} {u.last_name}
+                    </td>
+                    <td style={{ padding: "12px 16px", color: "#4b5563" }}>
+                      {u.email}
+                    </td>
+                    <td style={{ padding: "12px 16px" }}>
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          padding: "2px 10px",
+                          borderRadius: "9999px",
+                          fontSize: "0.75rem",
+                          fontWeight: 600,
+                          backgroundColor: rc.bg,
+                          color: rc.color,
+                        }}
+                      >
+                        {u.roles?.name}
+                      </span>
+                    </td>
+                    <td style={{ padding: "12px 16px", color: "#4b5563" }}>
+                      {u.departments?.name || "—"}
+                    </td>
+                    <td style={{ padding: "12px 16px" }}>
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          padding: "2px 10px",
+                          borderRadius: "9999px",
+                          fontSize: "0.75rem",
+                          fontWeight: 600,
+                          backgroundColor: u.is_active ? "#dcfce7" : "#fee2e2",
+                          color: u.is_active ? "#15803d" : "#b91c1c",
+                        }}
+                      >
+                        {u.is_active ? "Active" : "Inactive"}
+                      </span>
+                    </td>
+                    <td style={{ padding: "12px 16px" }}>
+                      <div style={{ display: "flex", gap: "8px" }}>
+                        <button
+                          onClick={() => openEdit(u)}
+                          title="Edit"
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: "32px",
+                            height: "32px",
+                            borderRadius: "8px",
+                            border: "1px solid #e5e7eb",
+                            backgroundColor: "#fff",
+                            cursor: "pointer",
+                            color: "#1A3A8F",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = "#eff6ff";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = "#fff";
+                          }}
+                        >
+                          <Pencil size={14} />
+                        </button>
+                        <button
+                          onClick={() => setDeleteTarget(u)}
+                          title="Deactivate"
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            width: "32px",
+                            height: "32px",
+                            borderRadius: "8px",
+                            border: "1px solid #e5e7eb",
+                            backgroundColor: "#fff",
+                            cursor: "pointer",
+                            color: "#b91c1c",
+                          }}
+                          onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = "#fef2f2";
+                          }}
+                          onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = "#fff";
+                          }}
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Modals */}
+      <UserModal
+        isOpen={modalOpen}
+        onClose={() => setModalOpen(false)}
+        onSave={handleSave}
+        saving={saving}
+        editData={editTarget}
+        departments={departments}
+        roles={roles}
+      />
+      <DeleteConfirmModal
+        isOpen={!!deleteTarget}
+        user={deleteTarget}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+        deleting={deleting}
+      />
     </PageWrapper>
   );
 }

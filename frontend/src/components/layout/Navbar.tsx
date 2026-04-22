@@ -13,7 +13,7 @@ export const Navbar = ({ title }: { title?: string }) => {
   return (
     <header className="h-16 bg-white border-b border-gray-100 shadow-sm flex items-center justify-between px-6 sticky top-0 z-30">
       {/* Title */}
-      <h1 className="text-base font-extrabold tracking-tight bg-gradient-to-r from-bisu-blue to-bisu-purple bg-clip-text text-transparent m-0">
+      <h1 className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-bisu-blue to-bisu-purple bg-clip-text text-transparent m-0">
         {title || "BISU-Bilar Procurement MIS"}
       </h1>
 

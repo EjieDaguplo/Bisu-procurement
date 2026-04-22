@@ -1,6 +1,8 @@
 import { Router } from "express";
 import authRoutes from "./auth-routes";
 import userRoutes from "./user-routes";
+import departmentRoutes from "./department-routes";
+import roleRoutes from "./role-routes";
 import purchaseRequestRoutes from "./purchaseRequest-routes";
 import approvalRoutes from "./approval-routes";
 import trackingRoutes from "./tracking-routes";
@@ -12,6 +14,8 @@ export const router = Router();
 
 router.use("/auth", authRoutes);
 router.use("/users", authMiddleware, userRoutes);
+router.use("/departments", authMiddleware, departmentRoutes);
+router.use("/roles", authMiddleware, roleRoutes);
 router.use("/purchase-requests", authMiddleware, purchaseRequestRoutes);
 router.use("/approvals", authMiddleware, approvalRoutes);
 router.use("/tracking", authMiddleware, trackingRoutes);
