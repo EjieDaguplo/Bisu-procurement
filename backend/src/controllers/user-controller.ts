@@ -48,17 +48,43 @@ export const createUser = async (req: Request, res: Response) => {
 };
 
 export const updateUser = async (req: Request, res: Response) => {
-  const { password, ...rest } = req.body;
-  const data: Record<string, unknown> = { ...rest };
-  if (password) data.password_hash = await bcrypt.hash(password, 10);
+  try {
+    const { password, current_password, ...rest } = req.body;
+    const data: Record<string, unknown> = { ...rest };
 
-  const user = await prisma.users.update({
-    where: { id: Number(req.params.id) },
-    data,
-    include: { roles: true },
-    omit: { password_hash: true },
-  });
-  return res.json(user);
+    if (password) {
+      // If changing password, verify current password first
+      if (current_password) {
+        const existing = await prisma.users.findUnique({
+          where: { id: Number(req.params.id) },
+        });
+        if (!existing)
+          return res.status(404).json({ message: "User not found" });
+
+        const valid = await bcrypt.compare(
+          current_password,
+          existing.password_hash,
+        );
+        if (!valid)
+          return res
+            .status(400)
+            .json({ message: "Current password is incorrect." });
+      }
+      data.password_hash = await bcrypt.hash(password, 10);
+    }
+
+    const user = await prisma.users.update({
+      where: { id: Number(req.params.id) },
+      data,
+      include: { roles: true },
+    });
+
+    const { password_hash, ...safeUser } = user;
+    return res.json(safeUser);
+  } catch (err) {
+    console.error("UPDATE USER ERROR:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
 };
 
 export const deleteUser = async (req: Request, res: Response) => {

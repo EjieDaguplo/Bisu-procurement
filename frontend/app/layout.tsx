@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "BISU-Bilar Procurement MIS",
   description:
-    "Web-Baseds Procurement Management Information System of BISU Bilar",
+    "Web-Based Procurement Management Information System of BISU Bilar",
 };
 
 export default function RootLayout({
