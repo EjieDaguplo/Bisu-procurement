@@ -16,7 +16,7 @@ export const Navbar = ({ title }: { title?: string }) => {
     <>
       <header className="h-16 bg-white border-b border-gray-100 shadow-sm flex items-center justify-between px-6 sticky top-0 z-30">
         {/* Title */}
-        <h1 className="text-lg font-extrabold tracking-tight text-bisu-blue m-0">
+        <h1 className="text-lg font-extrabold tracking-tight text-bisu-blue m-0 pl-12">
           {title || "BISU-Bilar Procurement MIS"}
         </h1>
 

@@ -9,15 +9,19 @@ import { errorMiddleware } from "./middleware/error-middleware";
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT) || 5000;
 
 app.use(helmet());
 app.use(
   cors({
-    origin:
-      process.env.FRONTEND_URL ||
-      "http://localhost:3000" ||
-      "http://192.168.43.43:3000",
+    origin: (origin, callback) => {
+      const allowed = ["http://localhost:3000", "http://192.168.43.43:3000"];
+      if (!origin || allowed.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
     credentials: true,
   }),
 );
@@ -33,7 +37,7 @@ app.get("/health", (_req, res) => {
 
 app.use(errorMiddleware);
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 BISU Procurement API running on port ${PORT}`);
 });
 
