@@ -28,14 +28,14 @@ export const MyProfileModal = ({ isOpen, onClose }: Props) => {
 
   const [activeTab, setActiveTab] = useState<Tab>("profile");
 
-  /* ── Profile form ── */
+  /* Profile form */
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveOk, setSaveOk] = useState(false);
   const [saveErr, setSaveErr] = useState("");
 
-  /* ── Password form ── */
+  /* Password form */
   const [currentPw, setCurrentPw] = useState("");
   const [newPw, setNewPw] = useState("");
   const [confirmPw, setConfirmPw] = useState("");
@@ -147,7 +147,7 @@ export const MyProfileModal = ({ isOpen, onClose }: Props) => {
 
       {/* Modal */}
       <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden">
-        {/* ── Header ── */}
+        {/* Header */}
         <div className="bg-gradient-to-r from-bisu-blue to-bisu-purple px-6 py-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
@@ -177,7 +177,7 @@ export const MyProfileModal = ({ isOpen, onClose }: Props) => {
           </div>
         </div>
 
-        {/* ── Tabs ── */}
+        {/* Tabs */}
         <div className="flex border-b border-gray-100">
           <button
             onClick={() => setActiveTab("profile")}
@@ -201,9 +201,9 @@ export const MyProfileModal = ({ isOpen, onClose }: Props) => {
           </button>
         </div>
 
-        {/* ── Tab content ── */}
+        {/* Tab content */}
         <div className="px-6 py-5 max-h-[60vh] overflow-y-auto">
-          {/* ── PROFILE TAB ── */}
+          {/* PROFILE TAB */}
           {activeTab === "profile" && (
             <div className="space-y-5">
               {/* Read-only info */}
@@ -294,7 +294,7 @@ export const MyProfileModal = ({ isOpen, onClose }: Props) => {
             </div>
           )}
 
-          {/* ── PASSWORD TAB ── */}
+          {/* PASSWORD TAB */}
           {activeTab === "password" && (
             <div className="space-y-4">
               <div>
@@ -399,7 +399,7 @@ export const MyProfileModal = ({ isOpen, onClose }: Props) => {
   );
 };
 
-/* ── Sub-components ── */
+/* Sub-components */
 
 const InfoRow = ({
   icon,
@@ -460,7 +460,7 @@ const PasswordField = ({
   </div>
 );
 
-/* ── Password strength helper ── */
+/* Password strength helper */
 const passwordStrength = (pw: string): number => {
   let score = 0;
   if (pw.length >= 8) score++;

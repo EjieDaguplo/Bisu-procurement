@@ -170,7 +170,7 @@ export const Sidebar = () => {
 
   return (
     <>
-      {/* ── Mobile hamburger button ── */}
+      {/* Mobile hamburger button */}
       <button
         onClick={() => setMobile(true)}
         className="lg:hidden fixed top-4 left-4 z-40 w-10 h-10 rounded-xl bg-[#1A3A8F] text-white flex items-center justify-center shadow-lg border border-white/10"
@@ -179,7 +179,7 @@ export const Sidebar = () => {
         <Menu size={20} />
       </button>
 
-      {/* ── Mobile backdrop overlay ── */}
+      {/* Mobile backdrop overlay */}
       {mobileOpen && (
         <div
           className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
@@ -187,7 +187,7 @@ export const Sidebar = () => {
         />
       )}
 
-      {/* ── Mobile drawer ── */}
+      {/* Mobile drawer */}
       <aside
         className={`
           lg:hidden fixed top-0 left-0 z-50 h-full w-64 flex flex-col
@@ -208,12 +208,12 @@ export const Sidebar = () => {
         <NavContent />
       </aside>
 
-      {/* ── Desktop sidebar (always visible on lg+) ── */}
+      {/* Desktop sidebar (always visible on lg+) */}
       <aside className="hidden lg:flex sticky top-0 h-screen w-64 shrink-0 flex-col overflow-hidden shadow-[0_2px_16px_rgba(26,58,143,0.12)] bg-[#1A3A8F]">
         <NavContent />
       </aside>
 
-      {/* ── Logout modal ── */}
+      {/* Logout modal */}
       <LogoutModal
         isOpen={showLogoutModal}
         onConfirm={() => {

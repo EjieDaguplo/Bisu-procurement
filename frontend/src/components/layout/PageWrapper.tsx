@@ -1,4 +1,3 @@
-//pageWrapper.tsx
 import React from "react";
 
 interface PageWrapperProps {

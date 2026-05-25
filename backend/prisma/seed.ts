@@ -1,4 +1,3 @@
-// prisma/seed.ts
 import { PrismaClient } from "../generated/prisma/client";
 import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import bcrypt from "bcryptjs";
@@ -20,9 +19,7 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log("🌱 Starting seed...\n");
 
-  // -------------------------------------------------------
   // ROLES
-  // -------------------------------------------------------
   console.log("📌 Seeding roles...");
   const roles = await Promise.all([
     prisma.roles.upsert({
@@ -70,11 +67,9 @@ async function main() {
 
   const [roleRequester, roleApprover, roleProcurement, roleAdmin, roleIT] =
     roles;
-  console.log(`   ✅ ${roles.length} roles seeded`);
+  console.log(` ${roles.length} roles seeded`);
 
-  // -------------------------------------------------------
   // DEPARTMENTS
-  // -------------------------------------------------------
   console.log("🏢 Seeding departments...");
   const departments = await Promise.all([
     prisma.departments.upsert({
@@ -123,12 +118,10 @@ async function main() {
     deptProcurement,
     deptIT,
   ] = departments;
-  console.log(`   ✅ ${departments.length} departments seeded`);
+  console.log(` ${departments.length} departments seeded`);
 
-  // -------------------------------------------------------
   // ITEM CATEGORIES
-  // -------------------------------------------------------
-  console.log("🏷️  Seeding item categories...");
+  console.log("Seeding item categories...");
   const categories = await Promise.all([
     prisma.item_categories.upsert({
       where: { code: "SUPPLIES" },
@@ -194,12 +187,10 @@ async function main() {
     catRepairs,
     catIT,
   ] = categories;
-  console.log(`   ✅ ${categories.length} item categories seeded`);
+  console.log(`${categories.length} item categories seeded`);
 
-  // -------------------------------------------------------
   // APPROVAL STEPS
-  // -------------------------------------------------------
-  console.log("📋 Seeding approval steps...");
+  console.log("Seeding approval steps...");
   await prisma.approval_steps.upsert({
     where: { step_order: 1 },
     update: {},
@@ -227,11 +218,9 @@ async function main() {
       role_id: roleAdmin.id,
     },
   });
-  console.log("   ✅ 3 approval steps seeded");
+  console.log(" 3 approval steps seeded");
 
-  // -------------------------------------------------------
   // USERS
-  // -------------------------------------------------------
   console.log("👤 Seeding users...");
 
   const hashPassword = async (plain: string) => bcrypt.hash(plain, 10);
@@ -320,7 +309,7 @@ async function main() {
     },
   });
 
-  console.log("   ✅ 6 users seeded");
+  console.log(" 6 users seeded");
   console.log("\n   📧 Login credentials:");
   console.log("   ┌─────────────────────────────────────────────────┐");
   console.log("   │  Admin      → admin@bisu.edu.ph / Admin@123     │");
@@ -331,9 +320,7 @@ async function main() {
   console.log("   │  Librarian  → librarian@bisu.edu.ph / User@123  │");
   console.log("   └─────────────────────────────────────────────────┘\n");
 
-  // -------------------------------------------------------
   // PURCHASE REQUESTS
-  // -------------------------------------------------------
   console.log("📄 Seeding purchase requests...");
 
   // PR 1 — SUBMITTED (office supplies)
@@ -560,12 +547,10 @@ async function main() {
     },
   });
 
-  console.log("   ✅ 5 purchase requests seeded");
+  console.log(" 5 purchase requests seeded");
 
-  // -------------------------------------------------------
   // APPROVAL RECORDS
-  // -------------------------------------------------------
-  console.log("✅ Seeding approval records...");
+  console.lo Seeding approval records...");
 
   const step1 = await prisma.approval_steps.findFirst({
     where: { step_order: 1 },
@@ -650,11 +635,9 @@ async function main() {
     ],
   });
 
-  console.log("   ✅ Approval records seeded");
+  console.log(" Approval records seeded");
 
-  // -------------------------------------------------------
   // TRACKING LOGS
-  // -------------------------------------------------------
   console.log("🗺️  Seeding tracking logs...");
 
   await prisma.tracking_logs.createMany({
@@ -765,11 +748,9 @@ async function main() {
     ],
   });
 
-  console.log("   ✅ Tracking logs seeded");
+  console.log(" Tracking logs seeded");
 
-  // -------------------------------------------------------
   // NOTIFICATIONS
-  // -------------------------------------------------------
   console.log("🔔 Seeding notifications...");
 
   await prisma.notifications.createMany({
@@ -840,11 +821,9 @@ async function main() {
     ],
   });
 
-  console.log("   ✅ Notificationss seeded");
+  console.log(" Notificationss seeded");
 
-  // -------------------------------------------------------
   // ML CLASSIFICATION HISTORY
-  // -------------------------------------------------------
   console.log("🤖 Seeding ML classification history...");
 
   await prisma.ml_classifications.createMany({
@@ -927,11 +906,9 @@ async function main() {
     ],
   });
 
-  console.log("   ✅ ML classification history seeded");
+  console.log(" ML classification history seeded");
 
-  // -------------------------------------------------------
   // DONE
-  // -------------------------------------------------------
   console.log("\n🎉 Seed completed successfully!");
   console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`   Roles:              ${roles.length}`);

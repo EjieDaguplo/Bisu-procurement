@@ -1,5 +1,5 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL;
-console.log("API_BASE:", API_BASE);
+// console.log("API_BASE:", API_BASE);
 
 class ApiClient {
   private getToken(): string | null {

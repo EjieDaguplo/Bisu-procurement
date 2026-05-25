@@ -2,6 +2,10 @@ import { Response } from "express";
 import { prisma } from "../config/database";
 import { AuthRequest } from "../types";
 import { Decimal } from "../../generated/prisma/internal/prismaNamespace";
+import {
+  notifyPRSubmitted,
+  notifyApproverPending,
+} from "../services/notification-service";
 const generatePRNumber = async () => {
   const year = new Date().getFullYear();
   const count = await prisma.purchase_requests.count();
@@ -178,45 +182,35 @@ export const deletePR = async (req: AuthRequest, res: Response) => {
 export const submitPR = async (req: AuthRequest, res: Response) => {
   try {
     const prId = Number(req.params.id);
-
-    // --- Validate PR exists and is DRAFT ---
     const pr = await prisma.purchase_requests.findUnique({
       where: { id: prId },
     });
-
     if (!pr) return res.status(404).json({ message: "PR not found" });
     if (pr.status !== "DRAFT")
       return res
         .status(400)
         .json({ message: "Only DRAFT PRs can be submitted" });
 
-    // --- Get all active approval steps ---
     const steps = await prisma.approval_steps.findMany({
       where: { is_active: true },
       orderBy: { step_order: "asc" },
     });
+    if (!steps.length)
+      return res.status(400).json({ message: "No approval steps configured." });
 
-    if (steps.length === 0)
-      return res.status(400).json({
-        message: "No approval steps configured. Please contact admin.",
-      });
-
-    // --- Update PR status to SUBMITTED ---
     const updated = await prisma.purchase_requests.update({
       where: { id: prId },
       data: { status: "SUBMITTED" },
     });
 
-    // --- Create PENDING approval record for each step ---
     await prisma.pr_approvals.createMany({
-      data: steps.map((step) => ({
+      data: steps.map((s) => ({
         purchase_request_id: prId,
-        approval_step_id: step.id,
+        approval_step_id: s.id,
         action: "PENDING" as const,
       })),
     });
 
-    // --- Tracking log ---
     await prisma.tracking_logs.create({
       data: {
         purchase_request_id: prId,
@@ -230,36 +224,40 @@ export const submitPR = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    // --- Notify the requester ---
-    await prisma.notifications.create({
-      data: {
-        user_id: req.user!.userId,
-        purchase_request_id: prId,
-        type: "PR_SUBMITTED",
-        title: "PR Submitted Successfully",
-        message: `Your PR ${updated.pr_number} — "${updated.title}" has been submitted and is awaiting approval.`,
-      },
+    // Get requester info for email
+    const requester = await prisma.users.findUnique({
+      where: { id: req.user!.userId },
     });
+    const requesterName = `${requester?.first_name} ${requester?.last_name}`;
 
-    // --- Notify approvers of the first step ---
-    const firstStepApprovers = await prisma.users.findMany({
-      where: {
-        role_id: steps[0].role_id,
-        is_active: true,
-      },
+    // Notify requester (in-app + email)
+    await notifyPRSubmitted(
+      req.user!.userId,
+      prId,
+      updated.pr_number,
+      updated.title,
+      Number(updated.total_amount),
+      requesterName,
+    );
+
+    // Notify first-step approvers (in-app + email)
+    const firstApprovers = await prisma.users.findMany({
+      where: { role_id: steps[0].role_id, is_active: true },
     });
-
-    if (firstStepApprovers.length > 0) {
-      await prisma.notifications.createMany({
-        data: firstStepApprovers.map((approver) => ({
-          user_id: approver.id,
-          purchase_request_id: prId,
-          type: "PENDING_ACTION" as const,
-          title: "New PR Awaiting Your Approval",
-          message: `PR ${updated.pr_number} — "${updated.title}" has been submitted and requires your review at step "${steps[0].step_name}".`,
-        })),
-      });
-    }
+    await Promise.all(
+      firstApprovers.map((a) =>
+        notifyApproverPending(
+          a.id,
+          prId,
+          updated.pr_number,
+          updated.title,
+          Number(updated.total_amount),
+          `${a.first_name} ${a.last_name}`,
+          requesterName,
+          steps[0].step_name,
+        ),
+      ),
+    );
 
     return res.json(updated);
   } catch (err) {

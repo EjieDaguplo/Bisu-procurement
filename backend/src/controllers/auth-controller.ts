@@ -39,7 +39,7 @@ export const login = async (req: Request, res: Response) => {
     const payload = {
       userId: user.id,
       email: user.email,
-      role: user.roles.name, // "roles" is the relation field name in your schema
+      role: user.roles.name, // "roles" is the relation field name in schema
     };
 
     const accessToken = generateAccessToken(payload);
@@ -68,7 +68,7 @@ export const login = async (req: Request, res: Response) => {
       },
     });
   } catch (err) {
-    console.error("❌ LOGIN ERROR:", err); // always log the real error
+    console.error("LOGIN ERROR:", err); // always log the real error
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -83,7 +83,7 @@ export const logout = async (req: AuthRequest, res: Response) => {
     }
     return res.json({ message: "Logged out successfully" });
   } catch (err) {
-    console.error("❌ LOGOUT ERROR:", err);
+    console.error("LOGOUT ERROR:", err);
     return res.status(500).json({ message: "Server error" });
   }
 };
@@ -119,7 +119,7 @@ export const refreshToken = async (req: Request, res: Response) => {
 
     return res.json({ accessToken });
   } catch (err) {
-    console.error("❌ REFRESH TOKEN ERROR:", err);
+    console.error("REFRESH TOKEN ERROR:", err);
     return res.status(401).json({ message: "Invalid refresh token" });
   }
 };
@@ -144,7 +144,7 @@ export const getMe = async (req: AuthRequest, res: Response) => {
 
     return res.json(safeUser);
   } catch (err) {
-    console.error("❌ GET ME ERROR:", err);
+    console.error("GET ME ERROR:", err);
     return res.status(500).json({ message: "Server error" });
   }
 };

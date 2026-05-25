@@ -1,23 +1,21 @@
-// this is having issue by fetching user FIX IT
 "use client";
 import React, { useEffect, useState } from "react";
 import { PageWrapper } from "@/src/components/layout/PageWrapper";
 import { api } from "@/src/lib/api";
 import { UserModal } from "./UserModal";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
-import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import { SuccessModal } from "./SuccessModal";
+import { Plus, Pencil, Trash2, Search, Users, RefreshCw } from "lucide-react";
 
 interface Department {
   id: number;
   name: string;
   code: string;
 }
-
 interface Role {
   id: number;
   name: string;
 }
-
 interface UserRow {
   id: number;
   employee_id: string;
@@ -29,12 +27,21 @@ interface UserRow {
   departments: Department | null;
 }
 
+const roleStyle: Record<string, string> = {
+  ADMIN: "bg-purple-100 text-purple-700",
+  APPROVER: "bg-blue-100 text-blue-700",
+  REQUESTER: "bg-green-100 text-green-700",
+  PROCUREMENT_OFFICER: "bg-yellow-100 text-yellow-800",
+  IT: "bg-gray-100 text-gray-600",
+};
+
 export default function UsersPage() {
   const [users, setUsers] = useState<UserRow[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<UserRow | null>(null);
@@ -42,14 +49,23 @@ export default function UsersPage() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
+  // ── Success modal state ──
+  const [successOpen, setSuccessOpen] = useState(false);
+  const [successTitle, setSuccessTitle] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
+
+  const showSuccess = (title: string, message: string) => {
+    setSuccessTitle(title);
+    setSuccessMessage(message);
+    setSuccessOpen(true);
+  };
+
   const load = async () => {
     setLoading(true);
     try {
-      // Fetch users first — this is the critical call
       const u = await api.get<UserRow[]>("/users");
       setUsers(u);
 
-      // Derive departments and roles from users as fallback
       const deptMap = new Map<number, Department>();
       const roleMap = new Map<number, Role>();
       u.forEach((user) => {
@@ -58,7 +74,6 @@ export default function UsersPage() {
         if (user.roles) roleMap.set(user.roles.id, user.roles);
       });
 
-      // Try to fetch departments/roles separately — gracefully ignore failures
       try {
         const d = await api.get<Department[]>("/departments");
         setDepartments(d);
@@ -83,11 +98,14 @@ export default function UsersPage() {
     load();
   }, []);
 
-  const filtered = users.filter((u) =>
-    `${u.first_name} ${u.last_name} ${u.email} ${u.employee_id}`
-      .toLowerCase()
-      .includes(search.toLowerCase()),
-  );
+  const filtered = users.filter((u) => {
+    const matchesSearch =
+      `${u.first_name} ${u.last_name} ${u.email} ${u.employee_id}`
+        .toLowerCase()
+        .includes(search.toLowerCase());
+    const matchesRole = roleFilter ? u.roles?.name === roleFilter : true;
+    return matchesSearch && matchesRole;
+  });
 
   const openCreate = () => {
     setEditTarget(null);
@@ -103,8 +121,16 @@ export default function UsersPage() {
     try {
       if (editTarget) {
         await api.put(`/users/${editTarget.id}`, data);
+        showSuccess(
+          "User Updated",
+          `${editTarget.first_name} ${editTarget.last_name}'s account has been updated successfully.`,
+        );
       } else {
         await api.post("/users", data);
+        showSuccess(
+          "User Created",
+          `New user account has been created successfully.`,
+        );
       }
       setModalOpen(false);
       await load();
@@ -113,25 +139,47 @@ export default function UsersPage() {
     }
   };
 
-  const handleDelete = async () => {
+  const handleDeactivate = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      await api.delete(`/users/${deleteTarget.id}`);
+      await api.patch(`/users/${deleteTarget.id}/deactivate`);
+      const name = `${deleteTarget.first_name} ${deleteTarget.last_name}`;
       setDeleteTarget(null);
       await load();
+      showSuccess(
+        "Account Deactivated",
+        `${name}'s account has been deactivated. They can no longer log in.`,
+      );
+    } catch (err: unknown) {
+      throw err;
     } finally {
       setDeleting(false);
     }
   };
 
-  const roleColor: Record<string, { bg: string; color: string }> = {
-    ADMIN: { bg: "#ede9fe", color: "#6d28d9" },
-    APPROVER: { bg: "#dbeafe", color: "#1d4ed8" },
-    REQUESTER: { bg: "#dcfce7", color: "#15803d" },
-    PROCUREMENT_OFFICER: { bg: "#fef9c3", color: "#92400e" },
-    IT: { bg: "#f3f4f6", color: "#374151" },
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/users/${deleteTarget.id}`);
+      const name = `${deleteTarget.first_name} ${deleteTarget.last_name}`;
+      setDeleteTarget(null);
+      await load();
+      showSuccess(
+        "User Deleted",
+        `${name}'s account has been permanently deleted from the system.`,
+      );
+    } catch (err: unknown) {
+      throw err;
+    } finally {
+      setDeleting(false);
+    }
   };
+
+  const totalUsers = users.length;
+  const activeUsers = users.filter((u) => u.is_active).length;
+  const inactiveUsers = users.filter((u) => !u.is_active).length;
 
   return (
     <PageWrapper
@@ -139,261 +187,203 @@ export default function UsersPage() {
       action={
         <button
           onClick={openCreate}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "8px",
-            backgroundColor: "#1A3A8F",
-            color: "#fff",
-            fontWeight: 600,
-            fontSize: "0.875rem",
-            padding: "10px 20px",
-            borderRadius: "8px",
-            border: "none",
-            cursor: "pointer",
-          }}
+          className="inline-flex items-center gap-2 bg-bisu-blue hover:bg-bisu-blue-dark text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition-colors border-none cursor-pointer"
         >
           <Plus size={16} /> New User
         </button>
       }
     >
-      {/* Search */}
-      <div
-        style={{
-          marginBottom: "16px",
-          position: "relative",
-          maxWidth: "320px",
-        }}
-      >
-        <Search
-          size={16}
-          style={{
-            position: "absolute",
-            left: "12px",
-            top: "50%",
-            transform: "translateY(-50%)",
-            color: "#9ca3af",
-          }}
-        />
-        <input
-          placeholder="Search users..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{
-            width: "100%",
-            padding: "10px 16px 10px 36px",
-            border: "1px solid #d1d5db",
-            borderRadius: "8px",
-            fontSize: "0.875rem",
-            color: "#111827",
-            outline: "none",
-            boxSizing: "border-box",
-          }}
-        />
-      </div>
+      <div className="flex flex-col gap-5">
+        {/* ── Stats ── */}
+        <div className="grid grid-cols-3 gap-4">
+          {[
+            {
+              label: "Total Users",
+              value: totalUsers,
+              cls: "bg-blue-50 text-bisu-blue border-blue-100",
+            },
+            {
+              label: "Active",
+              value: activeUsers,
+              cls: "bg-green-50 text-green-700 border-green-100",
+            },
+            {
+              label: "Inactive",
+              value: inactiveUsers,
+              cls: "bg-red-50 text-red-600 border-red-100",
+            },
+          ].map(({ label, value, cls }) => (
+            <div
+              key={label}
+              className={`rounded-xl border px-5 py-4 flex items-center gap-3 ${cls}`}
+            >
+              <Users size={20} className="flex-shrink-0 opacity-70" />
+              <div>
+                <p className="text-2xl font-bold leading-none">{value}</p>
+                <p className="text-xs font-medium opacity-70 mt-0.5">{label}</p>
+              </div>
+            </div>
+          ))}
+        </div>
 
-      {/* Table */}
-      <div
-        style={{
-          overflowX: "auto",
-          borderRadius: "12px",
-          border: "1px solid #e5e7eb",
-          backgroundColor: "#fff",
-        }}
-      >
-        <table
-          style={{
-            width: "100%",
-            borderCollapse: "collapse",
-            fontSize: "0.875rem",
-          }}
-        >
-          <thead>
-            <tr style={{ backgroundColor: "#1A3A8F" }}>
-              {[
-                "Employee ID",
-                "Name",
-                "Email",
-                "Role",
-                "Department",
-                "Status",
-                "Actions",
-              ].map((h) => (
-                <th
-                  key={h}
-                  style={{
-                    textAlign: "left",
-                    padding: "12px 16px",
-                    fontWeight: 600,
-                    color: "#fff",
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {loading ? (
-              <tr>
-                <td
-                  colSpan={7}
-                  style={{
-                    textAlign: "center",
-                    padding: "32px",
-                    color: "#9ca3af",
-                  }}
-                >
-                  Loading...
-                </td>
+        {/* ── Filters ── */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="relative flex-1 max-w-xs">
+            <Search
+              size={15}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+            />
+            <input
+              placeholder="Search name, email, ID..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full border border-gray-200 rounded-lg pl-9 pr-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bisu-blue/30 focus:border-bisu-blue transition-all"
+            />
+          </div>
+          <select
+            value={roleFilter}
+            onChange={(e) => setRoleFilter(e.target.value)}
+            className="border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-bisu-blue/30 focus:border-bisu-blue transition-all max-w-xs"
+          >
+            <option value="">All Roles</option>
+            {roles.map((r) => (
+              <option key={r.id} value={r.name}>
+                {r.name.replace(/_/g, " ")}
+              </option>
+            ))}
+          </select>
+          <button
+            onClick={load}
+            className="inline-flex items-center gap-2 border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium px-4 py-2.5 rounded-lg transition-colors"
+          >
+            <RefreshCw size={14} /> Refresh
+          </button>
+        </div>
+
+        {/* ── Table ── */}
+        <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white shadow-sm">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="bg-bisu-blue">
+                {[
+                  "Employee ID",
+                  "Name",
+                  "Email",
+                  "Role",
+                  "Department",
+                  "Status",
+                  "Actions",
+                ].map((h) => (
+                  <th
+                    key={h}
+                    className="text-left px-4 py-3 font-semibold text-white whitespace-nowrap text-xs tracking-wide"
+                  >
+                    {h}
+                  </th>
+                ))}
               </tr>
-            ) : filtered.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={7}
-                  style={{
-                    textAlign: "center",
-                    padding: "32px",
-                    color: "#9ca3af",
-                  }}
-                >
-                  No users found.
-                </td>
-              </tr>
-            ) : (
-              filtered.map((u, i) => {
-                const rc = roleColor[u.roles?.name] || {
-                  bg: "#f3f4f6",
-                  color: "#374151",
-                };
-                return (
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-12 text-gray-400">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-gray-200 border-t-bisu-blue rounded-full animate-spin" />
+                      Loading users...
+                    </div>
+                  </td>
+                </tr>
+              ) : filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-12 text-gray-400">
+                    <Users size={32} className="mx-auto mb-2 text-gray-300" />
+                    No users found.
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((u, i) => (
                   <tr
                     key={u.id}
-                    style={{
-                      borderTop: "1px solid #f3f4f6",
-                      backgroundColor: i % 2 === 0 ? "#fff" : "#f9fafb",
-                    }}
+                    className={`border-t border-gray-100 transition-colors hover:bg-blue-50/30
+                      ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}
+                      ${!u.is_active ? "opacity-60" : ""}
+                    `}
                   >
-                    <td
-                      style={{
-                        padding: "12px 16px",
-                        fontFamily: "monospace",
-                        fontWeight: 700,
-                        color: "#1A3A8F",
-                        fontSize: "0.75rem",
-                      }}
-                    >
+                    <td className="px-4 py-3 font-mono font-bold text-bisu-blue text-xs">
                       {u.employee_id}
                     </td>
-                    <td
-                      style={{
-                        padding: "12px 16px",
-                        fontWeight: 500,
-                        color: "#1f2937",
-                      }}
-                    >
-                      {u.first_name} {u.last_name}
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-8 h-8 rounded-full bg-bisu-blue flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                          {u.first_name[0]}
+                          {u.last_name[0]}
+                        </div>
+                        <span className="font-medium text-gray-800">
+                          {u.first_name} {u.last_name}
+                        </span>
+                      </div>
                     </td>
-                    <td style={{ padding: "12px 16px", color: "#4b5563" }}>
+                    <td className="px-4 py-3 text-gray-500 text-xs">
                       {u.email}
                     </td>
-                    <td style={{ padding: "12px 16px" }}>
+                    <td className="px-4 py-3">
                       <span
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          padding: "2px 10px",
-                          borderRadius: "9999px",
-                          fontSize: "0.75rem",
-                          fontWeight: 600,
-                          backgroundColor: rc.bg,
-                          color: rc.color,
-                        }}
+                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${roleStyle[u.roles?.name] ?? "bg-gray-100 text-gray-600"}`}
                       >
-                        {u.roles?.name}
+                        {u.roles?.name?.replace(/_/g, " ")}
                       </span>
                     </td>
-                    <td style={{ padding: "12px 16px", color: "#4b5563" }}>
-                      {u.departments?.name || "—"}
+                    <td className="px-4 py-3 text-gray-500 text-xs">
+                      {u.departments?.name || (
+                        <span className="text-gray-300">—</span>
+                      )}
                     </td>
-                    <td style={{ padding: "12px 16px" }}>
+                    <td className="px-4 py-3">
                       <span
-                        style={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          padding: "2px 10px",
-                          borderRadius: "9999px",
-                          fontSize: "0.75rem",
-                          fontWeight: 600,
-                          backgroundColor: u.is_active ? "#dcfce7" : "#fee2e2",
-                          color: u.is_active ? "#15803d" : "#b91c1c",
-                        }}
+                        className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${u.is_active ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"}`}
                       >
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full mr-1.5 ${u.is_active ? "bg-green-500" : "bg-red-400"}`}
+                        />
                         {u.is_active ? "Active" : "Inactive"}
                       </span>
                     </td>
-                    <td style={{ padding: "12px 16px" }}>
-                      <div style={{ display: "flex", gap: "8px" }}>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-1.5">
                         <button
                           onClick={() => openEdit(u)}
-                          title="Edit"
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: "32px",
-                            height: "32px",
-                            borderRadius: "8px",
-                            border: "1px solid #e5e7eb",
-                            backgroundColor: "#fff",
-                            cursor: "pointer",
-                            color: "#1A3A8F",
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = "#eff6ff";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = "#fff";
-                          }}
+                          title="Edit user"
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 bg-white text-bisu-blue hover:bg-blue-50 hover:border-bisu-blue/30 transition-colors cursor-pointer"
                         >
-                          <Pencil size={14} />
+                          <Pencil size={13} />
                         </button>
                         <button
                           onClick={() => setDeleteTarget(u)}
-                          title="Deactivate"
-                          style={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            width: "32px",
-                            height: "32px",
-                            borderRadius: "8px",
-                            border: "1px solid #e5e7eb",
-                            backgroundColor: "#fff",
-                            cursor: "pointer",
-                            color: "#b91c1c",
-                          }}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = "#fef2f2";
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = "#fff";
-                          }}
+                          title="Manage account"
+                          className="inline-flex items-center justify-center w-8 h-8 rounded-lg border border-gray-200 bg-white text-red-500 hover:bg-red-50 hover:border-red-200 transition-colors cursor-pointer"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={13} />
                         </button>
                       </div>
                     </td>
                   </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+                ))
+              )}
+            </tbody>
+          </table>
+
+          {!loading && filtered.length > 0 && (
+            <div className="px-4 py-3 border-t border-gray-100 bg-gray-50/50 text-xs text-gray-400">
+              Showing {filtered.length} of {users.length} user
+              {users.length !== 1 ? "s" : ""}
+              {roleFilter && ` · Role: ${roleFilter.replace(/_/g, " ")}`}
+              {search && ` · Search: "${search}"`}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Modals */}
+      {/* ── Modals ── */}
       <UserModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
@@ -403,12 +393,21 @@ export default function UsersPage() {
         departments={departments}
         roles={roles}
       />
+
       <DeleteConfirmModal
         isOpen={!!deleteTarget}
         user={deleteTarget}
         onClose={() => setDeleteTarget(null)}
-        onConfirm={handleDelete}
-        deleting={deleting}
+        onDeactivate={handleDeactivate}
+        onDelete={handleDelete}
+      />
+
+      {/* ── Success modal ── */}
+      <SuccessModal
+        isOpen={successOpen}
+        title={successTitle}
+        message={successMessage}
+        onClose={() => setSuccessOpen(false)}
       />
     </PageWrapper>
   );

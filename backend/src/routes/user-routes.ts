@@ -4,10 +4,9 @@ import {
   getUserById,
   createUser,
   updateUser,
+  deactivateUser,
   deleteUser,
 } from "../controllers/user-controller";
-import { getAllDepartments } from "../controllers/department-controller";
-import { getAllRoles } from "../controllers/role-controller";
 import { requireRole } from "../middleware/role-middleware";
 
 const router = Router();
@@ -16,6 +15,7 @@ router.get("/", requireRole("ADMIN", "IT"), getAllUsers);
 router.get("/:id", requireRole("ADMIN", "IT"), getUserById);
 router.post("/", requireRole("ADMIN"), createUser);
 router.put("/:id", requireRole("ADMIN"), updateUser);
+router.patch("/:id/deactivate", requireRole("ADMIN"), deactivateUser);
 router.delete("/:id", requireRole("ADMIN"), deleteUser);
 
 export default router;
