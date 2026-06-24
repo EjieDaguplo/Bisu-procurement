@@ -18,7 +18,7 @@ export default function DashboardLayout({
   }, [router]);
 
   return (
-    // ✅ Page locked to viewport height, only inner content scrolls
+    //Page locked to viewport height, only inner content scrolls
     <div className="flex h-screen overflow-hidden bg-bisu-offwhite">
       <Sidebar mobileOpen={mobileOpen} onClose={() => setMobileOpen(false)} />
 

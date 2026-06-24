@@ -5,6 +5,7 @@ import { X } from "lucide-react";
 interface Department {
   id: number;
   name: string;
+  code: string;
 }
 interface Role {
   id: number;
@@ -286,7 +287,7 @@ export const UserModal = ({
               <option value="">— Select Department —</option>
               {departments.map((d) => (
                 <option key={d.id} value={d.id}>
-                  {d.name}
+                  {d.name} ({d.code})
                 </option>
               ))}
             </select>
@@ -353,7 +354,7 @@ export const UserModal = ({
   );
 };
 
-// ── Helpers ──────────────────────────────────────────────────
+// Helpers
 const Field = ({
   label,
   children,

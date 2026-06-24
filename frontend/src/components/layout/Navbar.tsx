@@ -19,11 +19,10 @@ export const Navbar = ({ title, onMenuClick }: NavbarProps) => {
 
   return (
     <>
-      {/* ✅ sticky ONLY — removed the conflicting "fixed" class */}
       <header className="h-16 bg-white border-b border-gray-100 shadow-sm flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
         {/* Left: hamburger (mobile only) + title */}
         <div className="flex items-center gap-3 min-w-0">
-          {/* ✅ Hamburger now lives in Navbar */}
+          {/*Hamburger in Navbar */}
           <button
             onClick={onMenuClick}
             className="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg bg-bisu-blue text-white hover:bg-bisu-blue-dark transition-colors flex-shrink-0"

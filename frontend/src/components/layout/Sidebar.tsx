@@ -166,7 +166,7 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
 
   return (
     <>
-      {/* ✅ No floating hamburger here anymore — it's in Navbar now */}
+      {/*No floating hamburger here anymore — it's in Navbar now */}
 
       {/* Mobile backdrop */}
       {mobileOpen && (

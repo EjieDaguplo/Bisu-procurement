@@ -71,11 +71,35 @@ async function main() {
 
   // DEPARTMENTS
   console.log("🏢 Seeding departments...");
+  // prisma/seed.ts — update for future fresh installs only, don't run now
   const departments = await Promise.all([
     prisma.departments.upsert({
-      where: { code: "COT" },
+      where: { code: "CTE" },
       update: {},
-      create: { code: "COT", name: "College of Technology" },
+      create: { code: "CTE", name: "College of Teacher Education" },
+    }),
+    prisma.departments.upsert({
+      where: { code: "CTECH" },
+      update: {},
+      create: { code: "CTECH", name: "College of Technology" },
+    }),
+    prisma.departments.upsert({
+      where: { code: "CBM" },
+      update: {},
+      create: { code: "CBM", name: "College of Business Management" },
+    }),
+    prisma.departments.upsert({
+      where: { code: "CFES" },
+      update: {},
+      create: {
+        code: "CFES",
+        name: "College of Forestry and Environmental Science",
+      },
+    }),
+    prisma.departments.upsert({
+      where: { code: "COAS" },
+      update: {},
+      create: { code: "COAS", name: "College of Agricultural Sciences" },
     }),
     prisma.departments.upsert({
       where: { code: "ADMIN" },
@@ -83,40 +107,26 @@ async function main() {
       create: { code: "ADMIN", name: "Administration Office" },
     }),
     prisma.departments.upsert({
-      where: { code: "LIB" },
+      where: { code: "PROCUREMENT" },
       update: {},
-      create: { code: "LIB", name: "Library" },
-    }),
-    prisma.departments.upsert({
-      where: { code: "ACCT" },
-      update: {},
-      create: { code: "ACCT", name: "Accounting Office" },
+      create: { code: "PROCUREMENT", name: "Procurement Office" },
     }),
     prisma.departments.upsert({
       where: { code: "REGISTRAR" },
       update: {},
       create: { code: "REGISTRAR", name: "Registrar Office" },
     }),
-    prisma.departments.upsert({
-      where: { code: "PROCUREMENT" },
-      update: {},
-      create: { code: "PROCUREMENT", name: "Procurement Office" },
-    }),
-    prisma.departments.upsert({
-      where: { code: "IT_DEPT" },
-      update: {},
-      create: { code: "IT_DEPT", name: "IT Department" },
-    }),
   ]);
 
   const [
-    deptCOT,
-    deptAdmin,
-    deptLib,
-    deptAcct,
-    deptRegistrar,
-    deptProcurement,
-    deptIT,
+    deptCTE,
+    deptCTECH,
+    deptCBM,
+    deptCFES,
+    deptCOAS,
+    deptADMIN,
+    deptPROCUREMENT,
+    deptREGISTRAR,
   ] = departments;
   console.log(` ${departments.length} departments seeded`);
 
@@ -235,7 +245,7 @@ async function main() {
       email: "admin@bisu.edu.ph",
       password_hash: await hashPassword("Admin@123"),
       role_id: roleAdmin.id,
-      department_id: deptAdmin.id,
+      department_id: deptADMIN.id,
     },
   });
 
@@ -249,7 +259,7 @@ async function main() {
       email: "requester@bisu.edu.ph",
       password_hash: await hashPassword("s@123"),
       role_id: roleRequester.id,
-      department_id: deptCOT.id,
+      department_id: deptCTECH.id,
     },
   });
 
@@ -263,7 +273,7 @@ async function main() {
       email: "approver@bisu.edu.ph",
       password_hash: await hashPassword("User@123"),
       role_id: roleApprover.id,
-      department_id: deptAdmin.id,
+      department_id: deptADMIN.id,
     },
   });
 
@@ -277,7 +287,7 @@ async function main() {
       email: "procurement@bisu.edu.ph",
       password_hash: await hashPassword("User@123"),
       role_id: roleProcurement.id,
-      department_id: deptProcurement.id,
+      department_id: deptPROCUREMENT.id,
     },
   });
 
@@ -291,7 +301,7 @@ async function main() {
       email: "it@bisu.edu.ph",
       password_hash: await hashPassword("User@123"),
       role_id: roleIT.id,
-      department_id: deptIT.id,
+      department_id: deptADMIN.id,
     },
   });
 
@@ -305,7 +315,7 @@ async function main() {
       email: "librarian@bisu.edu.ph",
       password_hash: await hashPassword("User@123"),
       role_id: roleRequester.id,
-      department_id: deptLib.id,
+      department_id: deptCBM.id,
     },
   });
 
@@ -331,7 +341,7 @@ async function main() {
       purpose:
         "Procurement of essential office supplies needed for the daily operations of the College of Technology for the second quarter of 2026.",
       requested_by: requester.id,
-      department_id: deptCOT.id,
+      department_id: deptCTECH.id,
       total_amount: 8300.0,
       status: "SUBMITTED",
       priority: "NORMAL",
@@ -378,7 +388,7 @@ async function main() {
       purpose:
         "Upgrade of computer laboratory equipment to support the BS Computer Science curriculum requirements and improve student learning experience.",
       requested_by: requester.id,
-      department_id: deptCOT.id,
+      department_id: deptCTECH.id,
       total_amount: 451500.0,
       status: "APPROVED",
       priority: "HIGH",
@@ -434,7 +444,7 @@ async function main() {
       purpose:
         "Urgent repair of malfunctioning air conditioning units in the faculty room and computer laboratory.",
       requested_by: requester.id,
-      department_id: deptAdmin.id,
+      department_id: deptADMIN.id,
       total_amount: 12900.0,
       status: "REJECTED",
       priority: "URGENT",
@@ -473,7 +483,7 @@ async function main() {
       purpose:
         "Acquisition of new books and reference materials for the university library to support academic research and studies.",
       requested_by: requester2.id,
-      department_id: deptLib.id,
+      department_id: deptCBM.id,
       total_amount: 22250.0,
       status: "DRAFT",
       priority: "LOW",
@@ -512,7 +522,7 @@ async function main() {
       purpose:
         "Monthly replenishment of accounting office supplies and printer consumables for financial document processing.",
       requested_by: requester.id,
-      department_id: deptAcct.id,
+      department_id: deptPROCUREMENT.id,
       total_amount: 15600.0,
       status: "UNDER_REVIEW",
       priority: "NORMAL",
@@ -550,7 +560,7 @@ async function main() {
   console.log(" 5 purchase requests seeded");
 
   // APPROVAL RECORDS
-  console.lo Seeding approval records...");
+  console.log("Seeding approval records...");
 
   const step1 = await prisma.approval_steps.findFirst({
     where: { step_order: 1 },

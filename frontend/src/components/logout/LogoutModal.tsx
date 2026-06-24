@@ -34,7 +34,7 @@ export const LogoutModal = ({
         {/* Close button */}
         <button
           onClick={onCancel}
-          className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center rounded-full text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors"
+          className="absolute top-4 right-4 w-7 h-7 flex items-center justify-center text-gray-400 hover:bg-gray-100 hover:text-gray-600 transition-colors rounded-lg"
         >
           <X size={15} />
         </button>

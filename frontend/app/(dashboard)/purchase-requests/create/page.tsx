@@ -141,7 +141,7 @@ export default function CreatePRPage() {
           </div>
         )}
 
-        {/* ── Request Info ── */}
+        {/*  Request Info  */}
         <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm flex flex-col gap-4">
           <h3 className="font-bold text-bisu-blue text-base">
             Request Information
@@ -176,7 +176,7 @@ export default function CreatePRPage() {
                 <option value="">— Select Department —</option>
                 {departments.map((d) => (
                   <option key={d.id} value={d.id}>
-                    {d.name}
+                    {d.name} ({d.code})
                   </option>
                 ))}
               </select>
@@ -246,7 +246,7 @@ export default function CreatePRPage() {
           </div>
         </div>
 
-        {/* ── Line Items ── */}
+        {/*  Line Items  */}
         <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <h3 className="font-bold text-bisu-blue text-base">
@@ -390,7 +390,7 @@ export default function CreatePRPage() {
           </div>
         </div>
 
-        {/* ── Actions ── */}
+        {/*  Actions  */}
         <div className="flex items-center justify-end gap-3">
           <Link
             href="/purchase-requests"
