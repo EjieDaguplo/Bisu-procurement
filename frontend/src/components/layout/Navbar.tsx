@@ -1,12 +1,17 @@
 "use client";
 import React, { useState } from "react";
-import { Bell } from "lucide-react";
+import { Bell, Menu } from "lucide-react";
 import { useNotifications } from "@/src/hooks/useNotification";
 import { useAuth } from "@/src/hooks/useAuth";
 import Link from "next/link";
 import { MyProfileModal } from "@/src/components/profile/MyProfile";
 
-export const Navbar = ({ title }: { title?: string }) => {
+interface NavbarProps {
+  title?: string;
+  onMenuClick?: () => void;
+}
+
+export const Navbar = ({ title, onMenuClick }: NavbarProps) => {
   const { unreadCount } = useNotifications();
   const { user } = useAuth();
   const [showMenu, setShowMenu] = useState(false);
@@ -14,13 +19,25 @@ export const Navbar = ({ title }: { title?: string }) => {
 
   return (
     <>
-      <header className="h-16 bg-white border-b border-gray-100 shadow-sm flex items-center justify-between px-6 sticky top-0 z-30">
-        {/* Title */}
-        <h1 className="text-lg font-extrabold tracking-tight text-bisu-blue m-0 pl-12">
-          {title || "BISU-Bilar Procurement MIS"}
-        </h1>
+      {/* ✅ sticky ONLY — removed the conflicting "fixed" class */}
+      <header className="h-16 bg-white border-b border-gray-100 shadow-sm flex items-center justify-between px-4 lg:px-6 sticky top-0 z-30">
+        {/* Left: hamburger (mobile only) + title */}
+        <div className="flex items-center gap-3 min-w-0">
+          {/* ✅ Hamburger now lives in Navbar */}
+          <button
+            onClick={onMenuClick}
+            className="lg:hidden flex items-center justify-center w-9 h-9 rounded-lg bg-bisu-blue text-white hover:bg-bisu-blue-dark transition-colors flex-shrink-0"
+            aria-label="Open menu"
+          >
+            <Menu size={19} />
+          </button>
 
-        <div className="flex items-center gap-4">
+          <h1 className="text-base lg:text-xl font-extrabold tracking-tight text-bisu-blue truncate m-0">
+            {title || "BISU-Bilar Procurement MIS"}
+          </h1>
+        </div>
+
+        <div className="flex items-center gap-2 lg:gap-4 flex-shrink-0">
           {/* Bell */}
           <Link
             href="/notifications"
@@ -38,7 +55,7 @@ export const Navbar = ({ title }: { title?: string }) => {
           <div className="relative">
             <button
               onClick={() => setShowMenu(!showMenu)}
-              className="flex items-center gap-2 bg-transparent border-none cursor-pointer px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 bg-transparent border-none cursor-pointer px-2 lg:px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <div className="w-8 h-8 rounded-full bg-bisu-blue flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
                 {user?.first_name?.[0]}
@@ -49,10 +66,8 @@ export const Navbar = ({ title }: { title?: string }) => {
               </span>
             </button>
 
-            {/* Dropdown */}
             {showMenu && (
               <>
-                {/* Click-away backdrop */}
                 <div
                   className="fixed inset-0 z-40"
                   onClick={() => setShowMenu(false)}
@@ -67,7 +82,6 @@ export const Navbar = ({ title }: { title?: string }) => {
                       {user?.role}
                     </span>
                   </div>
-
                   <button
                     onClick={() => {
                       setShowProfile(true);
@@ -84,7 +98,6 @@ export const Navbar = ({ title }: { title?: string }) => {
         </div>
       </header>
 
-      {/* Profile Modal */}
       <MyProfileModal
         isOpen={showProfile}
         onClose={() => setShowProfile(false)}

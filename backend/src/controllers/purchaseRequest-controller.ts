@@ -312,3 +312,57 @@ export const cancelPR = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
+//Admin force-delete a PR and ALL its cascade records
+export const adminDeletePR = async (req: AuthRequest, res: Response) => {
+  try {
+    const prId = Number(req.params.id);
+
+    const pr = await prisma.purchase_requests.findUnique({
+      where: { id: prId },
+    });
+    if (!pr) return res.status(404).json({ message: "PR not found" });
+
+    // Delete in correct dependency order
+
+    // 1. ML classifications
+    await prisma.ml_classifications.deleteMany({
+      where: { purchase_request_id: prId },
+    });
+
+    // 2. Notifications linked to this PR
+    await prisma.notifications.deleteMany({
+      where: { purchase_request_id: prId },
+    });
+
+    // 3. Tracking logs
+    await prisma.tracking_logs.deleteMany({
+      where: { purchase_request_id: prId },
+    });
+
+    // 4. PR approvals
+    await prisma.pr_approvals.deleteMany({
+      where: { purchase_request_id: prId },
+    });
+
+    // 5. PR line items
+    await prisma.pr_line_items.deleteMany({
+      where: { purchase_request_id: prId },
+    });
+
+    // 6. Delete the PR itself
+    await prisma.purchase_requests.delete({
+      where: { id: prId },
+    });
+
+    return res.json({
+      message: `PR ${pr.pr_number} and all associated records have been permanently deleted.`,
+      deleted: {
+        pr_number: pr.pr_number,
+        pr_id: prId,
+      },
+    });
+  } catch (err) {
+    console.error("ADMIN DELETE PR ERROR:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};

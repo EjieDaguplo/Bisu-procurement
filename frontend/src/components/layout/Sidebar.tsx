@@ -12,7 +12,6 @@ import {
   Users,
   Bell,
   LogOut,
-  Menu,
   X,
 } from "lucide-react";
 import { useAuth } from "@/src/hooks/useAuth";
@@ -71,24 +70,24 @@ const navItems: NavItem[] = [
   },
 ];
 
-export const Sidebar = () => {
+interface SidebarProps {
+  mobileOpen: boolean;
+  onClose: () => void;
+}
+
+export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
   const pathname = usePathname();
   const { user, logout } = useAuth();
-  const [showLogoutModal, setLogout] = useState(false);
-  const [mobileOpen, setMobile] = useState(false);
+  const [showLogout, setLogout] = useState(false);
 
-  // Close sidebar on route change (mobile)
+  // Auto-close drawer on route change
   useEffect(() => {
-    setMobile(false);
+    onClose();
   }, [pathname]);
 
-  // Lock body scroll when mobile nav is open
+  // Lock body scroll when drawer is open
   useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
@@ -100,7 +99,6 @@ export const Sidebar = () => {
 
   const NavContent = () => (
     <>
-      {/* Logo */}
       <div className="flex flex-col items-center gap-2 px-6 py-6 border-b border-white/10">
         <Image
           src="/bisuLogo.png"
@@ -117,7 +115,6 @@ export const Sidebar = () => {
         </div>
       </div>
 
-      {/* Nav links */}
       <nav className="flex-1 p-3 flex flex-col gap-1 overflow-y-auto overflow-x-hidden">
         {filtered.map((item) => {
           const active =
@@ -144,7 +141,6 @@ export const Sidebar = () => {
         })}
       </nav>
 
-      {/* User + Sign out */}
       <div className="p-4 border-t border-white/10">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-9 h-9 rounded-full bg-[#F5C400] flex items-center justify-center text-[#0F2460] font-bold text-sm shrink-0">
@@ -170,20 +166,13 @@ export const Sidebar = () => {
 
   return (
     <>
-      {/* Mobile hamburger button */}
-      <button
-        onClick={() => setMobile(true)}
-        className="lg:hidden fixed top-4 left-4 z-40 w-10 h-10 rounded-xl bg-[#1A3A8F] text-white flex items-center justify-center shadow-lg border border-white/10"
-        aria-label="Open menu"
-      >
-        <Menu size={20} />
-      </button>
+      {/* ✅ No floating hamburger here anymore — it's in Navbar now */}
 
-      {/* Mobile backdrop overlay */}
+      {/* Mobile backdrop */}
       {mobileOpen && (
         <div
           className="lg:hidden fixed inset-0 z-40 bg-black/50 backdrop-blur-sm"
-          onClick={() => setMobile(false)}
+          onClick={onClose}
         />
       )}
 
@@ -196,26 +185,23 @@ export const Sidebar = () => {
           ${mobileOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
-        {/* Close button inside drawer */}
         <button
-          onClick={() => setMobile(false)}
-          className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-white/10 text-white/70 hover:bg-white/20 hover:text-white flex items-center justify-center transition-colors"
+          onClick={onClose}
+          className="absolute top-4 right-4 w-8 h-8 rounded-lg bg-white/10 text-white/70 hover:bg-white/20 hover:text-white flex items-center justify-center transition-colors z-10"
           aria-label="Close menu"
         >
           <X size={16} />
         </button>
-
         <NavContent />
       </aside>
 
-      {/* Desktop sidebar (always visible on lg+) */}
+      {/* Desktop sidebar */}
       <aside className="hidden lg:flex sticky top-0 h-screen w-64 shrink-0 flex-col overflow-hidden shadow-[0_2px_16px_rgba(26,58,143,0.12)] bg-[#1A3A8F]">
         <NavContent />
       </aside>
 
-      {/* Logout modal */}
       <LogoutModal
-        isOpen={showLogoutModal}
+        isOpen={showLogout}
         onConfirm={() => {
           setLogout(false);
           logout();

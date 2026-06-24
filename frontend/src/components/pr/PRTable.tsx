@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { PurchaseRequest } from "../../types";
 import { Table } from "../../components/ui/Table";
 import { StatusBadge, PriorityBadge } from "../../components/ui/Badge";
+import { usePagination } from "../../hooks/usePagination";
+import { Pagination } from "../../components/ui/Pagination";
 
 interface PRTableProps {
   data: PurchaseRequest[];
@@ -12,6 +14,14 @@ interface PRTableProps {
 
 export const PRTable = ({ data, loading }: PRTableProps) => {
   const router = useRouter();
+
+  const pg = usePagination({
+    totalItems: data.length,
+    initialPageSize: 8,
+    pageSizeOptions: [8, 15, 25, 50],
+  });
+
+  const visibleData = pg.paginate(data);
 
   const columns = [
     {
@@ -91,12 +101,38 @@ export const PRTable = ({ data, loading }: PRTableProps) => {
   ];
 
   return (
-    <Table
-      columns={columns}
-      data={data}
-      loading={loading}
-      emptyText="No purchase requests found."
-      onRowClick={(row) => router.push(`/purchase-requests/${row.id}`)}
-    />
+    <div className="flex flex-col gap-3">
+      <Table
+        columns={columns}
+        data={visibleData}
+        loading={loading}
+        emptyText="No purchase requests found."
+        onRowClick={(row) => router.push(`/purchase-requests/${row.id}`)}
+      />
+
+      {/* Only show pagination controls when there is more than one page */}
+      {!loading && pg.totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-1">
+          {/* Summary */}
+          <p className="text-xs text-gray-400">
+            Showing{" "}
+            <span className="font-semibold text-gray-600">
+              {pg.from}–{pg.to}
+            </span>{" "}
+            of{" "}
+            <span className="font-semibold text-gray-600">{pg.totalItems}</span>{" "}
+            requests
+          </p>
+
+          {/* Controls */}
+          <Pagination
+            {...pg}
+            showInfo={false}
+            showPageSize={true}
+            showEdgeButtons={true}
+          />
+        </div>
+      )}
+    </div>
   );
 };

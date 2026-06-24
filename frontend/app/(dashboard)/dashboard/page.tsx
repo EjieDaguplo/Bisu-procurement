@@ -12,10 +12,24 @@ import { StatsCard } from "@/src/components/dashboard/StatsCard";
 import { api } from "../../../src/lib/api";
 import { PurchaseRequest } from "../../../src/types";
 import { PRTable } from "@/src/components/pr/PRTable";
+import { usePagination } from "@/src/hooks/usePagination";
+import { Pagination } from "@/src/components/ui/Pagination";
 
 export default function DashboardPage() {
   const [prs, setPrs] = useState<PurchaseRequest[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Sort newest-first so "recent" always reflects actual recency
+  const recent = [...prs].sort(
+    (a, b) =>
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+  );
+
+  const pg = usePagination({
+    totalItems: recent.length,
+    initialPageSize: 8,
+    pageSizeOptions: [5, 8, 15, 25],
+  });
 
   useEffect(() => {
     api
@@ -32,8 +46,6 @@ export default function DashboardPage() {
     rejected: prs.filter((p) => p.status === "REJECTED").length,
     total_amount: prs.reduce((s, p) => s + Number(p.total_amount), 0),
   };
-
-  const recent = [...prs].slice(0, 8);
 
   return (
     <PageWrapper title="Dashboard">
@@ -122,17 +134,79 @@ export default function DashboardPage() {
             boxShadow: "0 2px 12px rgba(26,58,143,0.08)",
           }}
         >
-          <h3
+          {/* Card header */}
+          <div
             style={{
-              fontWeight: 700,
-              color: "#1A3A8F",
-              margin: "0 0 16px 0",
-              fontSize: "1rem",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: "16px",
+              flexWrap: "wrap",
+              gap: "8px",
             }}
           >
-            Recent Purchase Requests
-          </h3>
-          <PRTable data={recent} loading={loading} />
+            <h3
+              style={{
+                fontWeight: 700,
+                color: "#1A3A8F",
+                margin: 0,
+                fontSize: "1rem",
+              }}
+            >
+              Recent Purchase Requests
+            </h3>
+
+            {/* Rows-per-page inline with the header */}
+            {!loading && recent.length > 0 && (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "6px" }}
+              >
+                <span style={{ fontSize: "0.8125rem", color: "#9ca3af" }}>
+                  Rows:
+                </span>
+                <select
+                  value={pg.pageSize}
+                  onChange={(e) => pg.setPageSize(Number(e.target.value))}
+                  style={{
+                    fontSize: "0.8125rem",
+                    border: "1px solid #e5e7eb",
+                    borderRadius: "8px",
+                    padding: "4px 8px",
+                    background: "#fff",
+                    color: "#374151",
+                    outline: "none",
+                  }}
+                >
+                  {pg.pageSizeOptions.map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </div>
+
+          {/* Table */}
+          <PRTable data={pg.paginate(recent)} loading={loading} />
+
+          {/* Pagination controls */}
+          {!loading && recent.length > 0 && (
+            <div
+              style={{
+                marginTop: "16px",
+                paddingTop: "16px",
+                borderTop: "1px solid #f3f4f6",
+              }}
+            >
+              <Pagination
+                {...pg}
+                showPageSize={false} // already rendered in the header
+                showInfo={true}
+                showEdgeButtons={true}
+              />
+            </div>
+          )}
         </div>
       </div>
     </PageWrapper>

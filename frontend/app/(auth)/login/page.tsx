@@ -26,7 +26,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      {/* ── Left panel ── */}
+      {/*  Left panel  */}
       <div className="hidden lg:flex w-[44%] bg-bisu-blue-dark flex-col items-center justify-center px-12 py-16 relative overflow-hidden">
         {/* Decorative circles */}
         <div className="absolute w-80 h-80 rounded-full bg-bisu-yellow opacity-5 -top-20 -left-20" />
@@ -83,7 +83,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      {/* ── Right panel ── */}
+      {/*  Right panel  */}
       <div className="flex-1 flex items-center justify-center p-6 bg-bisu-offwhite">
         <div className="bg-white rounded-2xl border border-gray-100 shadow-card w-full max-w-[400px] px-9 py-10">
           {/* Mobile logo */}

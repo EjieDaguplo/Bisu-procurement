@@ -6,30 +6,23 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
+import { UsePaginationReturn } from "../../hooks/usePagination";
 
-interface PaginationProps {
-  currentPage: number;
-  totalPages: number;
-  totalItems: number;
-  startIndex: number;
-  endIndex: number;
-  hasPrev: boolean;
-  hasNext: boolean;
-  onPageChange: (page: number) => void;
-  onNext: () => void;
-  onPrev: () => void;
-  /** Show per-page selector. Default: true */
-  showPageSizeSelector?: boolean;
-  itemsPerPage?: number;
-  onItemsPerPageChange?: (n: number) => void;
-  pageSizeOptions?: number[];
-  /** Label for items, e.g. "requests". Default: "items" */
-  itemLabel?: string;
-  /** Compact mode hides the item count summary. Default: false */
-  compact?: boolean;
+interface PaginationProps extends UsePaginationReturn {
+  /** Show the "Rows per page" selector. Default: true */
+  showPageSize?: boolean;
+  /** Show "X – Y of Z" info text. Default: true */
+  showInfo?: boolean;
+  /** Show first/last jump buttons. Default: true */
+  showEdgeButtons?: boolean;
+  /** Extra Tailwind classes on the root wrapper */
+  className?: string;
+  /** "compact" hides page-size selector & collapses label text */
+  variant?: "default" | "compact";
 }
 
-/** Returns an array of page numbers and ellipsis markers to render. */
+// ─── Page number builder ───────────────────────────────────────────────────────
+
 function buildPageWindows(current: number, total: number): (number | "...")[] {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
 
@@ -47,150 +40,182 @@ function buildPageWindows(current: number, total: number): (number | "...")[] {
   return pages;
 }
 
-export const Pagination = ({
-  currentPage,
-  totalPages,
-  totalItems,
-  startIndex,
-  endIndex,
-  hasPrev,
-  hasNext,
-  onPageChange,
-  onNext,
-  onPrev,
-  showPageSizeSelector = true,
-  itemsPerPage = 10,
-  onItemsPerPageChange,
-  pageSizeOptions = [10, 25, 50, 100],
-  itemLabel = "items",
-  compact = false,
-}: PaginationProps) => {
-  const pages = buildPageWindows(currentPage, totalPages);
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
-  if (totalPages <= 1 && totalItems <= (pageSizeOptions[0] ?? 10)) return null;
-
-  return (
-    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-gray-100">
-      {/* Left: summary */}
-      {!compact && (
-        <p className="text-sm text-gray-500 order-2 sm:order-1">
-          Showing{" "}
-          <span className="font-semibold text-gray-700">
-            {totalItems === 0 ? 0 : startIndex + 1}–{endIndex}
-          </span>{" "}
-          of <span className="font-semibold text-gray-700">{totalItems}</span>{" "}
-          {itemLabel}
-        </p>
-      )}
-
-      {/* Center / Right: controls */}
-      <div className="flex items-center gap-1 order-1 sm:order-2">
-        {/* First page */}
-        <PageButton
-          onClick={() => onPageChange(1)}
-          disabled={!hasPrev}
-          aria-label="First page"
-        >
-          <ChevronsLeft size={15} />
-        </PageButton>
-
-        {/* Prev */}
-        <PageButton
-          onClick={onPrev}
-          disabled={!hasPrev}
-          aria-label="Previous page"
-        >
-          <ChevronLeft size={15} />
-        </PageButton>
-
-        {/* Page numbers */}
-        {pages.map((p, i) =>
-          p === "..." ? (
-            <span
-              key={`ellipsis-${i}`}
-              className="w-8 h-8 flex items-center justify-center text-gray-400 text-sm select-none"
-            >
-              …
-            </span>
-          ) : (
-            <PageButton
-              key={p}
-              onClick={() => onPageChange(p as number)}
-              active={p === currentPage}
-              aria-label={`Page ${p}`}
-              aria-current={p === currentPage ? "page" : undefined}
-            >
-              {p}
-            </PageButton>
-          ),
-        )}
-
-        {/* Next */}
-        <PageButton onClick={onNext} disabled={!hasNext} aria-label="Next page">
-          <ChevronRight size={15} />
-        </PageButton>
-
-        {/* Last page */}
-        <PageButton
-          onClick={() => onPageChange(totalPages)}
-          disabled={!hasNext}
-          aria-label="Last page"
-        >
-          <ChevronsRight size={15} />
-        </PageButton>
-      </div>
-
-      {/* Per-page selector */}
-      {showPageSizeSelector && onItemsPerPageChange && (
-        <div className="flex items-center gap-2 order-3 text-sm text-gray-500">
-          <label htmlFor="page-size-select" className="whitespace-nowrap">
-            Rows per page
-          </label>
-          <select
-            id="page-size-select"
-            className="input-field !py-1 !px-2 !w-auto text-sm"
-            value={itemsPerPage}
-            onChange={(e) => onItemsPerPageChange(Number(e.target.value))}
-          >
-            {pageSizeOptions.map((n) => (
-              <option key={n} value={n}>
-                {n}
-              </option>
-            ))}
-          </select>
-        </div>
-      )}
-    </div>
-  );
-};
-
-/* ── Small helper ── */
-interface PageButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  active?: boolean;
-}
-
-const PageButton = ({
-  active,
-  children,
+const NavBtn = ({
+  onClick,
   disabled,
-  className = "",
-  ...props
-}: PageButtonProps) => (
+  title,
+  children,
+}: {
+  onClick: () => void;
+  disabled: boolean;
+  title: string;
+  children: React.ReactNode;
+}) => (
   <button
     type="button"
+    onClick={onClick}
     disabled={disabled}
+    title={title}
     className={[
-      "w-8 h-8 flex items-center justify-center rounded-md text-sm font-medium transition-colors select-none",
-      active
-        ? "bg-bisu-blue-DEFAULT text-white shadow-sm"
-        : "text-gray-600 hover:bg-gray-100",
+      "inline-flex items-center justify-center w-8 h-8 rounded-lg border text-sm font-medium transition-colors",
       disabled
-        ? "opacity-40 cursor-not-allowed pointer-events-none"
-        : "cursor-pointer",
-      className,
+        ? "border-gray-100 text-gray-300 cursor-not-allowed bg-white"
+        : "border-gray-200 text-gray-600 bg-white hover:bg-bisu-blue hover:text-white hover:border-bisu-blue",
     ].join(" ")}
-    {...props}
   >
     {children}
   </button>
 );
+
+const PageBtn = ({
+  page,
+  current,
+  onClick,
+}: {
+  page: number;
+  current: number;
+  onClick: (p: number) => void;
+}) => {
+  const active = page === current;
+  return (
+    <button
+      type="button"
+      onClick={() => onClick(page)}
+      className={[
+        "inline-flex items-center justify-center w-8 h-8 rounded-lg border text-sm font-medium transition-colors",
+        active
+          ? "bg-bisu-blue border-bisu-blue text-white shadow-sm"
+          : "border-gray-200 text-gray-600 bg-white hover:bg-bisu-blue hover:text-white hover:border-bisu-blue",
+      ].join(" ")}
+    >
+      {page}
+    </button>
+  );
+};
+
+// ─── Main Component ───────────────────────────────────────────────────────────
+
+export const Pagination = ({
+  page,
+  pageSize,
+  totalPages,
+  totalItems,
+  from,
+  to,
+  hasPrev,
+  hasNext,
+  setPage,
+  setPageSize,
+  goToFirst,
+  goToLast,
+  goToPrev,
+  goToNext,
+  pageSizeOptions,
+  showPageSize = true,
+  showInfo = true,
+  showEdgeButtons = true,
+  className = "",
+  variant = "default",
+}: PaginationProps) => {
+  const isCompact = variant === "compact";
+  const pages = buildPageWindows(page, totalPages);
+
+  return (
+    <div
+      className={[
+        "flex flex-wrap items-center gap-3",
+        isCompact ? "justify-center" : "justify-between",
+        className,
+      ].join(" ")}
+    >
+      {/* ── Left: info + page size ── */}
+      {!isCompact && (
+        <div className="flex items-center gap-3 flex-wrap">
+          {showInfo && (
+            <p className="text-sm text-gray-500">
+              {totalItems === 0 ? (
+                "No results"
+              ) : (
+                <>
+                  Showing{" "}
+                  <span className="font-semibold text-gray-700">
+                    {from}–{to}
+                  </span>{" "}
+                  of{" "}
+                  <span className="font-semibold text-gray-700">
+                    {totalItems}
+                  </span>
+                </>
+              )}
+            </p>
+          )}
+
+          {showPageSize && (
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm text-gray-400">Rows:</span>
+              <select
+                value={pageSize}
+                onChange={(e) => setPageSize(Number(e.target.value))}
+                className="text-sm border border-gray-200 rounded-lg px-2 py-1 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-bisu-blue/30 focus:border-bisu-blue transition-colors"
+              >
+                {pageSizeOptions.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Right: nav controls ── */}
+      <div className="flex items-center gap-1">
+        {showEdgeButtons && (
+          <NavBtn onClick={goToFirst} disabled={!hasPrev} title="First page">
+            <ChevronsLeft size={15} />
+          </NavBtn>
+        )}
+
+        <NavBtn onClick={goToPrev} disabled={!hasPrev} title="Previous page">
+          <ChevronLeft size={15} />
+        </NavBtn>
+
+        {/* Page number buttons */}
+        <div className="flex items-center gap-1 mx-1">
+          {pages.map((p, i) =>
+            p === "..." ? (
+              <span
+                key={`ellipsis-${i}`}
+                className="w-8 text-center text-gray-400 text-sm select-none"
+              >
+                …
+              </span>
+            ) : (
+              <PageBtn key={p} page={p} current={page} onClick={setPage} />
+            ),
+          )}
+        </div>
+
+        <NavBtn onClick={goToNext} disabled={!hasNext} title="Next page">
+          <ChevronRight size={15} />
+        </NavBtn>
+
+        {showEdgeButtons && (
+          <NavBtn onClick={goToLast} disabled={!hasNext} title="Last page">
+            <ChevronsRight size={15} />
+          </NavBtn>
+        )}
+      </div>
+
+      {/* Compact info */}
+      {isCompact && showInfo && (
+        <p className="w-full text-center text-xs text-gray-400">
+          Page {page} of {totalPages}
+        </p>
+      )}
+    </div>
+  );
+};

@@ -7,6 +7,7 @@ import {
   deletePR,
   submitPR,
   cancelPR,
+  adminDeletePR,
 } from "../controllers/purchaseRequest-controller";
 import { requireRole } from "../middleware/role-middleware";
 
@@ -26,6 +27,9 @@ router.post(
 // Only owner (checked in controller) or ADMIN can update/delete
 router.put("/:id", requireRole("REQUESTER", "ADMIN"), updatePR);
 router.delete("/:id", requireRole("REQUESTER", "ADMIN"), deletePR);
+
+// Admin force delete — any status, full cascade
+router.delete("/:id/force", requireRole("ADMIN"), adminDeletePR);
 
 // Submit and cancel
 router.patch("/:id/submit", requireRole("REQUESTER", "ADMIN"), submitPR);

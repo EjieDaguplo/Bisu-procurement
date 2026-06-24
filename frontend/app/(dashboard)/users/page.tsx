@@ -6,6 +6,8 @@ import { UserModal } from "./UserModal";
 import { DeleteConfirmModal } from "./DeleteConfirmModal";
 import { SuccessModal } from "./SuccessModal";
 import { Plus, Pencil, Trash2, Search, Users, RefreshCw } from "lucide-react";
+import { usePagination } from "@/src/hooks/usePagination";
+import { Pagination } from "@/src/components/ui/Pagination";
 
 interface Department {
   id: number;
@@ -49,7 +51,6 @@ export default function UsersPage() {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  // ── Success modal state ──
   const [successOpen, setSuccessOpen] = useState(false);
   const [successTitle, setSuccessTitle] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
@@ -107,6 +108,16 @@ export default function UsersPage() {
     return matchesSearch && matchesRole;
   });
 
+  // Reset to page 1 whenever filters change
+  const pg = usePagination({
+    totalItems: filtered.length,
+    initialPageSize: 10,
+    pageSizeOptions: [10, 25, 50],
+  });
+
+  // Keep page in bounds when filtered set shrinks
+  const visibleUsers = pg.paginate(filtered);
+
   const openCreate = () => {
     setEditTarget(null);
     setModalOpen(true);
@@ -129,7 +140,7 @@ export default function UsersPage() {
         await api.post("/users", data);
         showSuccess(
           "User Created",
-          `New user account has been created successfully.`,
+          "New user account has been created successfully.",
         );
       }
       setModalOpen(false);
@@ -236,13 +247,19 @@ export default function UsersPage() {
             <input
               placeholder="Search name, email, ID..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                pg.goToFirst();
+              }}
               className="w-full border border-gray-200 rounded-lg pl-9 pr-4 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-bisu-blue/30 focus:border-bisu-blue transition-all"
             />
           </div>
           <select
             value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
+            onChange={(e) => {
+              setRoleFilter(e.target.value);
+              pg.goToFirst();
+            }}
             className="border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-bisu-blue/30 focus:border-bisu-blue transition-all max-w-xs"
           >
             <option value="">All Roles</option>
@@ -293,7 +310,7 @@ export default function UsersPage() {
                     </div>
                   </td>
                 </tr>
-              ) : filtered.length === 0 ? (
+              ) : visibleUsers.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="text-center py-12 text-gray-400">
                     <Users size={32} className="mx-auto mb-2 text-gray-300" />
@@ -301,7 +318,7 @@ export default function UsersPage() {
                   </td>
                 </tr>
               ) : (
-                filtered.map((u, i) => (
+                visibleUsers.map((u, i) => (
                   <tr
                     key={u.id}
                     className={`border-t border-gray-100 transition-colors hover:bg-blue-50/30
@@ -372,12 +389,31 @@ export default function UsersPage() {
             </tbody>
           </table>
 
+          {/* ── Table footer: summary + pagination ── */}
           {!loading && filtered.length > 0 && (
-            <div className="px-4 py-3 border-t border-gray-100 bg-gray-50/50 text-xs text-gray-400">
-              Showing {filtered.length} of {users.length} user
-              {users.length !== 1 ? "s" : ""}
-              {roleFilter && ` · Role: ${roleFilter.replace(/_/g, " ")}`}
-              {search && ` · Search: "${search}"`}
+            <div className="px-4 py-3 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              {/* Summary text (replaces the old static one) */}
+              <p className="text-xs text-gray-400 flex-shrink-0">
+                Showing{" "}
+                <span className="font-semibold text-gray-600">
+                  {pg.from}–{pg.to}
+                </span>{" "}
+                of{" "}
+                <span className="font-semibold text-gray-600">
+                  {filtered.length}
+                </span>{" "}
+                user{filtered.length !== 1 ? "s" : ""}
+                {roleFilter && ` · Role: ${roleFilter.replace(/_/g, " ")}`}
+                {search && ` · "${search}"`}
+              </p>
+
+              {/* Pagination controls */}
+              <Pagination
+                {...pg}
+                showInfo={false}
+                showPageSize={true}
+                showEdgeButtons={true}
+              />
             </div>
           )}
         </div>
@@ -402,7 +438,6 @@ export default function UsersPage() {
         onDelete={handleDelete}
       />
 
-      {/* ── Success modal ── */}
       <SuccessModal
         isOpen={successOpen}
         title={successTitle}
