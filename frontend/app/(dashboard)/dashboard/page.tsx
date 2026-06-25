@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { PageWrapper } from "@/src/components/layout/PageWrapper";
 import { StatsCard } from "@/src/components/dashboard/StatsCard";
+import { CampusMap } from "@/src/components/dashboard/campusMap";
 import { api } from "../../../src/lib/api";
 import { PurchaseRequest } from "../../../src/types";
 import { PRTable } from "@/src/components/pr/PRTable";
@@ -19,7 +20,6 @@ export default function DashboardPage() {
   const [prs, setPrs] = useState<PurchaseRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Sort newest-first so "recent" always reflects actual recency
   const recent = [...prs].sort(
     (a, b) =>
       new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
@@ -49,15 +49,11 @@ export default function DashboardPage() {
 
   return (
     <PageWrapper title="Dashboard">
-      <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+      <div className="flex flex-col gap-6">
+        {/* Campus map */}
+        <CampusMap />
         {/* ── Stats grid ── */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
-            gap: "16px",
-          }}
-        >
+        <div className="grid grid-cols-2 sm:grid-cols-2 xl:grid-cols-4 gap-4">
           <StatsCard
             title="Total PRs"
             value={stats.total}
@@ -85,37 +81,13 @@ export default function DashboardPage() {
         </div>
 
         {/* ── Total procurement value banner ── */}
-        <div
-          style={{
-            background: "linear-gradient(to right, #1A3A8F, #5B2D8E)",
-            borderRadius: "12px",
-            padding: "20px 24px",
-            display: "flex",
-            alignItems: "center",
-            gap: "16px",
-            boxShadow: "0 2px 12px rgba(26,58,143,0.20)",
-          }}
-        >
-          <TrendingUp size={28} color="#F5C400" />
+        <div className="bg-linear-to-r from-bisu-blue to-bisu-purple rounded-xl px-6 py-5 flex items-center gap-4 shadow-[0_2px_12px_rgba(26,58,143,0.20)]">
+          <TrendingUp size={28} className="text-bisu-yellow shrink-0" />
           <div>
-            <p
-              style={{
-                color: "rgba(255,255,255,0.70)",
-                fontSize: "0.875rem",
-                fontWeight: 500,
-                margin: "0 0 2px 0",
-              }}
-            >
+            <p className="text-white/70 text-sm font-medium mb-0.5">
               Total Procurement Value
             </p>
-            <p
-              style={{
-                color: "#ffffff",
-                fontSize: "1.5rem",
-                fontWeight: 700,
-                margin: 0,
-              }}
-            >
+            <p className="text-white text-2xl font-bold m-0">
               ₱
               {stats.total_amount.toLocaleString("en-PH", {
                 minimumFractionDigits: 2,
@@ -124,89 +96,46 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* ── Recent PRs ── */}
-        <div
-          style={{
-            backgroundColor: "#ffffff",
-            borderRadius: "12px",
-            border: "1px solid #f3f4f6",
-            padding: "24px",
-            boxShadow: "0 2px 12px rgba(26,58,143,0.08)",
-          }}
-        >
-          {/* Card header */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: "16px",
-              flexWrap: "wrap",
-              gap: "8px",
-            }}
-          >
-            <h3
-              style={{
-                fontWeight: 700,
-                color: "#1A3A8F",
-                margin: 0,
-                fontSize: "1rem",
-              }}
-            >
-              Recent Purchase Requests
-            </h3>
+        {/* ── Two-column row: Recent PRs (left, wider) + Campus Map (right) ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 items-start">
+          {/* Recent PRs */}
+          <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-[0_2px_12px_rgba(26,58,143,0.08)]">
+            <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
+              <h3 className="font-bold text-bisu-blue text-base m-0">
+                Recent Purchase Requests
+              </h3>
 
-            {/* Rows-per-page inline with the header */}
+              {!loading && recent.length > 0 && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[0.8125rem] text-gray-400">Rows:</span>
+                  <select
+                    value={pg.pageSize}
+                    onChange={(e) => pg.setPageSize(Number(e.target.value))}
+                    className="text-[0.8125rem] border border-gray-200 rounded-lg px-2 py-1 bg-white text-gray-700 outline-none"
+                  >
+                    {pg.pageSizeOptions.map((s) => (
+                      <option key={s} value={s}>
+                        {s}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+
+            <PRTable data={pg.paginate(recent)} loading={loading} />
+
             {!loading && recent.length > 0 && (
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "6px" }}
-              >
-                <span style={{ fontSize: "0.8125rem", color: "#9ca3af" }}>
-                  Rows:
-                </span>
-                <select
-                  value={pg.pageSize}
-                  onChange={(e) => pg.setPageSize(Number(e.target.value))}
-                  style={{
-                    fontSize: "0.8125rem",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "8px",
-                    padding: "4px 8px",
-                    background: "#fff",
-                    color: "#374151",
-                    outline: "none",
-                  }}
-                >
-                  {pg.pageSizeOptions.map((s) => (
-                    <option key={s} value={s}>
-                      {s}
-                    </option>
-                  ))}
-                </select>
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <Pagination
+                  {...pg}
+                  showPageSize={false}
+                  showInfo={true}
+                  showEdgeButtons={true}
+                />
               </div>
             )}
           </div>
-
-          {/* Table */}
-          <PRTable data={pg.paginate(recent)} loading={loading} />
-
-          {/* Pagination controls */}
-          {!loading && recent.length > 0 && (
-            <div
-              style={{
-                marginTop: "16px",
-                paddingTop: "16px",
-                borderTop: "1px solid #f3f4f6",
-              }}
-            >
-              <Pagination
-                {...pg}
-                showPageSize={false} // already rendered in the header
-                showInfo={true}
-                showEdgeButtons={true}
-              />
-            </div>
-          )}
         </div>
       </div>
     </PageWrapper>

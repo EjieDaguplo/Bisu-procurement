@@ -20,6 +20,21 @@ interface Approval {
   approval_steps: { step_name: string };
 }
 
+const actionStyles = {
+  approve: {
+    btn: "bg-green-600 hover:bg-green-700",
+    label: "Confirm Approve",
+  },
+  reject: {
+    btn: "bg-red-600 hover:bg-red-700",
+    label: "Confirm Reject",
+  },
+  return: {
+    btn: "bg-orange-600 hover:bg-orange-700",
+    label: "Confirm Return",
+  },
+};
+
 export default function ApprovalsPage() {
   const [approvals, setApprovals] = useState<Approval[]>([]);
   const [loading, setLoading] = useState(true);
@@ -76,163 +91,69 @@ export default function ApprovalsPage() {
     }
   };
 
-  const actionColors = {
-    approve: { bg: "#16a34a", hover: "#15803d", label: "Confirm Approve" },
-    reject: { bg: "#dc2626", hover: "#b91c1c", label: "Confirm Reject" },
-    return: { bg: "#ea580c", hover: "#c2410c", label: "Confirm Return" },
-  };
-
   return (
     <PageWrapper title="Pending Approvals">
       {loading ? (
-        <div style={{ textAlign: "center", padding: "48px", color: "#9ca3af" }}>
-          Loading...
-        </div>
+        <div className="text-center py-12 text-gray-400">Loading...</div>
       ) : approvals.length === 0 ? (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "48px",
-            backgroundColor: "#fff",
-            borderRadius: "12px",
-            border: "1px solid #f3f4f6",
-          }}
-        >
-          <ClipboardList
-            size={40}
-            color="#d1d5db"
-            style={{ margin: "0 auto 12px" }}
-          />
-          <p style={{ color: "#9ca3af", margin: 0 }}>No pending approvals.</p>
+        <div className="text-center py-12 bg-white rounded-xl border border-gray-100">
+          <ClipboardList size={40} className="text-gray-300 mx-auto mb-3" />
+          <p className="text-gray-400 m-0">No pending approvals.</p>
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+        <div className="flex flex-col gap-3">
           {approvals.map((a) => (
             <div
               key={a.id}
-              style={{
-                backgroundColor: "#fff",
-                borderRadius: "12px",
-                border: "1px solid #f3f4f6",
-                padding: "20px 24px",
-                display: "flex",
-                alignItems: "center",
-                gap: "16px",
-                boxShadow: "0 2px 8px rgba(26,58,143,0.06)",
-              }}
+              className="bg-white rounded-xl border border-gray-100 px-6 py-5 flex items-center gap-4 shadow-[0_2px_8px_rgba(26,58,143,0.06)]"
             >
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    marginBottom: "4px",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "monospace",
-                      fontSize: "0.75rem",
-                      fontWeight: 700,
-                      color: "#1A3A8F",
-                    }}
-                  >
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="font-mono text-xs font-bold text-bisu-blue">
                     {a.purchase_requests.pr_number}
                   </span>
                   <StatusBadge
                     status={a.purchase_requests.status as PRStatus}
                   />
                 </div>
-                <p
-                  style={{
-                    fontWeight: 600,
-                    color: "#1f2937",
-                    margin: "0 0 4px 0",
-                    fontSize: "0.9375rem",
-                  }}
-                >
+
+                <p className="font-semibold text-gray-800 text-[0.9375rem] mb-1">
                   {a.purchase_requests.title}
                 </p>
-                <p
-                  style={{
-                    fontSize: "0.875rem",
-                    color: "#6b7280",
-                    margin: "0 0 4px 0",
-                  }}
-                >
+
+                <p className="text-sm text-gray-500 mb-1">
                   {a.purchase_requests.users.first_name}{" "}
                   {a.purchase_requests.users.last_name}
                   {" · "}₱
                   {Number(a.purchase_requests.total_amount).toLocaleString(
                     "en-PH",
-                    { minimumFractionDigits: 2 },
+                    {
+                      minimumFractionDigits: 2,
+                    },
                   )}
                 </p>
-                <p
-                  style={{
-                    fontSize: "0.75rem",
-                    color: "#7C4DB3",
-                    margin: 0,
-                    fontWeight: 500,
-                  }}
-                >
+
+                <p className="text-xs font-medium text-bisu-purple m-0">
                   Step: {a.approval_steps.step_name}
                 </p>
               </div>
 
-              <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+              <div className="flex gap-2 shrink-0">
                 <button
                   onClick={() => openAction(a, "approve")}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "8px 14px",
-                    backgroundColor: "#16a34a",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "8px",
-                    fontWeight: 600,
-                    fontSize: "0.8125rem",
-                    cursor: "pointer",
-                  }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-green-600 hover:bg-green-700 text-white font-semibold text-[0.8125rem] rounded-lg transition-colors"
                 >
                   <CheckCircle size={14} /> Approve
                 </button>
                 <button
                   onClick={() => openAction(a, "return")}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "8px 14px",
-                    backgroundColor: "#ea580c",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "8px",
-                    fontWeight: 600,
-                    fontSize: "0.8125rem",
-                    cursor: "pointer",
-                  }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-orange-600 hover:bg-orange-700 text-white font-semibold text-[0.8125rem] rounded-lg transition-colors"
                 >
                   <RotateCcw size={14} /> Return
                 </button>
                 <button
                   onClick={() => openAction(a, "reject")}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "6px",
-                    padding: "8px 14px",
-                    backgroundColor: "#dc2626",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "8px",
-                    fontWeight: 600,
-                    fontSize: "0.8125rem",
-                    cursor: "pointer",
-                  }}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold text-[0.8125rem] rounded-lg transition-colors"
                 >
                   <XCircle size={14} /> Reject
                 </button>
@@ -244,103 +165,37 @@ export default function ApprovalsPage() {
 
       {/* ── Action Modal ── */}
       {selected && action && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 50,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div
             onClick={closeModal}
-            style={{
-              position: "absolute",
-              inset: 0,
-              backgroundColor: "rgba(0,0,0,0.45)",
-              backdropFilter: "blur(2px)",
-            }}
+            className="absolute inset-0 bg-black/45 backdrop-blur-sm"
           />
 
-          <div
-            style={{
-              position: "relative",
-              backgroundColor: "#fff",
-              borderRadius: "16px",
-              boxShadow: "0 20px 60px rgba(0,0,0,0.18)",
-              width: "100%",
-              maxWidth: "460px",
-              margin: "16px",
-            }}
-          >
+          <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-[460px] m-4">
             {/* Modal header */}
-            <div
-              style={{
-                padding: "20px 24px",
-                borderBottom: "1px solid #f3f4f6",
-              }}
-            >
-              <h2
-                style={{
-                  margin: 0,
-                  fontSize: "1.125rem",
-                  fontWeight: 700,
-                  color: "#1A3A8F",
-                  textTransform: "capitalize",
-                }}
-              >
+            <div className="px-6 py-5 border-b border-gray-100">
+              <h2 className="m-0 text-lg font-bold text-bisu-blue capitalize">
                 {action} Purchase Request
               </h2>
-              <p
-                style={{
-                  margin: "4px 0 0 0",
-                  fontSize: "0.875rem",
-                  color: "#6b7280",
-                }}
-              >
+              <p className="mt-1 mb-0 text-sm text-gray-500">
                 {selected.purchase_requests.pr_number} —{" "}
                 {selected.purchase_requests.title}
               </p>
             </div>
 
             {/* Modal body */}
-            <div
-              style={{
-                padding: "20px 24px",
-                display: "flex",
-                flexDirection: "column",
-                gap: "12px",
-              }}
-            >
+            <div className="px-6 py-5 flex flex-col gap-3">
               {error && (
-                <div
-                  style={{
-                    backgroundColor: "#fef2f2",
-                    color: "#b91c1c",
-                    border: "1px solid #fecaca",
-                    borderRadius: "8px",
-                    padding: "10px 14px",
-                    fontSize: "0.875rem",
-                  }}
-                >
+                <div className="bg-red-50 text-red-700 border border-red-200 rounded-lg px-3.5 py-2.5 text-sm">
                   {error}
                 </div>
               )}
+
               <div>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "0.875rem",
-                    fontWeight: 500,
-                    color: "#374151",
-                    marginBottom: "6px",
-                  }}
-                >
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
                   Remarks{" "}
                   {action !== "approve" ? (
-                    <span style={{ color: "#b91c1c" }}>*</span>
+                    <span className="text-red-600">*</span>
                   ) : (
                     "(optional)"
                   )}
@@ -350,64 +205,27 @@ export default function ApprovalsPage() {
                   onChange={(e) => setRemarks(e.target.value)}
                   placeholder="Enter remarks..."
                   rows={4}
-                  style={{
-                    display: "block",
-                    width: "100%",
-                    border: "1px solid #d1d5db",
-                    borderRadius: "8px",
-                    padding: "10px 14px",
-                    fontSize: "0.875rem",
-                    color: "#111827",
-                    resize: "none",
-                    outline: "none",
-                    boxSizing: "border-box",
-                  }}
+                  className="block w-full border border-gray-300 rounded-lg px-3.5 py-2.5 text-sm text-gray-900 resize-none outline-none focus:ring-2 focus:ring-bisu-blue/30 focus:border-bisu-blue transition-all"
                 />
               </div>
             </div>
 
             {/* Modal footer */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: "12px",
-                padding: "16px 24px",
-                borderTop: "1px solid #f3f4f6",
-              }}
-            >
+            <div className="flex justify-end gap-3 px-6 py-4 border-t border-gray-100">
               <button
                 onClick={closeModal}
-                style={{
-                  padding: "10px 20px",
-                  borderRadius: "8px",
-                  border: "1px solid #d1d5db",
-                  backgroundColor: "#fff",
-                  color: "#374151",
-                  fontWeight: 500,
-                  cursor: "pointer",
-                  fontSize: "0.875rem",
-                }}
+                className="px-5 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleAction}
                 disabled={processing}
-                style={{
-                  padding: "10px 20px",
-                  borderRadius: "8px",
-                  border: "none",
-                  backgroundColor: processing
-                    ? "#6b7280"
-                    : actionColors[action].bg,
-                  color: "#fff",
-                  fontWeight: 600,
-                  cursor: processing ? "not-allowed" : "pointer",
-                  fontSize: "0.875rem",
-                }}
+                className={`px-5 py-2.5 rounded-lg text-white font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                  processing ? "bg-gray-500" : actionStyles[action].btn
+                }`}
               >
-                {processing ? "Processing..." : actionColors[action].label}
+                {processing ? "Processing..." : actionStyles[action].label}
               </button>
             </div>
           </div>
