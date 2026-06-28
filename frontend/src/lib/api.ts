@@ -77,5 +77,4 @@ class ApiClient {
     return this.request<T>(endpoint, { method: "DELETE" });
   }
 }
-
 export const api = new ApiClient();

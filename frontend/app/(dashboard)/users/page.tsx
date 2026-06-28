@@ -34,7 +34,6 @@ const roleStyle: Record<string, string> = {
   APPROVER: "bg-blue-100 text-blue-700",
   REQUESTER: "bg-green-100 text-green-700",
   PROCUREMENT_OFFICER: "bg-yellow-100 text-yellow-800",
-  IT: "bg-gray-100 text-gray-600",
 };
 
 export default function UsersPage() {

@@ -30,7 +30,7 @@ const navItems: NavItem[] = [
     label: "Dashboard",
     href: "/dashboard",
     icon: <LayoutDashboard size={18} />,
-    roles: ["REQUESTER", "APPROVER", "PROCUREMENT_OFFICER", "ADMIN", "IT"],
+    roles: ["REQUESTER", "APPROVER", "PROCUREMENT_OFFICER", "ADMIN"],
   },
   {
     label: "Purchase Requests",
@@ -60,13 +60,13 @@ const navItems: NavItem[] = [
     label: "Users",
     href: "/users",
     icon: <Users size={18} />,
-    roles: ["ADMIN", "IT"],
+    roles: ["ADMIN"],
   },
   {
     label: "Notifications",
     href: "/notifications",
     icon: <Bell size={18} />,
-    roles: ["REQUESTER", "APPROVER", "PROCUREMENT_OFFICER", "ADMIN", "IT"],
+    roles: ["REQUESTER", "APPROVER", "PROCUREMENT_OFFICER", "ADMIN"],
   },
 ];
 

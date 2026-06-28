@@ -1,9 +1,4 @@
-export type Role =
-  | "REQUESTER"
-  | "APPROVER"
-  | "PROCUREMENT_OFFICER"
-  | "ADMIN"
-  | "IT";
+export type Role = "REQUESTER" | "APPROVER" | "PROCUREMENT_OFFICER" | "ADMIN";
 export type PRStatus =
   | "DRAFT"
   | "SUBMITTED"

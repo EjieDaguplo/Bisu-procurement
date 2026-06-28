@@ -11,8 +11,8 @@ import { requireRole } from "../middleware/role-middleware";
 
 const router = Router();
 
-router.get("/", requireRole("ADMIN", "IT"), getAllUsers);
-router.get("/:id", requireRole("ADMIN", "IT"), getUserById);
+router.get("/", requireRole("ADMIN"), getAllUsers);
+router.get("/:id", requireRole("ADMIN"), getUserById);
 router.post("/", requireRole("ADMIN"), createUser);
 router.put("/:id", requireRole("ADMIN"), updateUser);
 router.patch("/:id/deactivate", requireRole("ADMIN"), deactivateUser);

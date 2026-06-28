@@ -55,18 +55,9 @@ async function main() {
         description: "System administrator with full access",
       },
     }),
-    prisma.roles.upsert({
-      where: { name: "IT" },
-      update: {},
-      create: {
-        name: "IT",
-        description: "IT personnel for system maintenance",
-      },
-    }),
   ]);
 
-  const [roleRequester, roleApprover, roleProcurement, roleAdmin, roleIT] =
-    roles;
+  const [roleRequester, roleApprover, roleProcurement, roleAdmin] = roles;
   console.log(` ${roles.length} roles seeded`);
 
   // DEPARTMENTS
@@ -288,20 +279,6 @@ async function main() {
       password_hash: await hashPassword("User@123"),
       role_id: roleProcurement.id,
       department_id: deptPROCUREMENT.id,
-    },
-  });
-
-  const itUser = await prisma.users.upsert({
-    where: { email: "it@bisu.edu.ph" },
-    update: {},
-    create: {
-      employee_id: "BISU-2024-005",
-      first_name: "Carlo",
-      last_name: "Mendoza",
-      email: "it@bisu.edu.ph",
-      password_hash: await hashPassword("User@123"),
-      role_id: roleIT.id,
-      department_id: deptADMIN.id,
     },
   });
 
