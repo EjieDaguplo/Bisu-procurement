@@ -31,7 +31,7 @@ export const Navbar = ({ title, onMenuClick }: NavbarProps) => {
             <Menu size={19} />
           </button>
 
-          <h1 className="text-base lg:text-xl font-extrabold tracking-tight text-bisu-blue truncate m-0">
+          <h1 className="text-base lg:text-2xl font-extrabold tracking-tight text-bisu-blue truncate m-0">
             {title || "BISU-Bilar Procurement MIS"}
           </h1>
         </div>

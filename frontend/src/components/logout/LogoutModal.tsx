@@ -63,13 +63,13 @@ export const LogoutModal = ({
         <div className="flex gap-3 w-full">
           <button
             onClick={onCancel}
-            className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 transition-colors"
+            className="flex-1 py-2.5 rounded-xl border border-gray-200 text-yellow-500 text-sm font-semibold hover:bg-gray-100 transition-colors"
           >
             Cancel
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-bold flex items-center justify-center gap-2 hover:bg-red-600 transition-colors shadow-[0_4px_12px_rgba(239,68,68,0.35)] hover:shadow-[0_6px_16px_rgba(239,68,68,0.45)]"
+            className="flex-1 py-2.5 rounded-xl bg-red-700 text-white text-sm font-bold flex items-center justify-center gap-2 hover:bg-red-600 transition-colors shadow-[0_4px_12px_rgba(239,68,68,0.35)] hover:shadow-[0_6px_16px_rgba(239,68,68,0.45)]"
           >
             <LogOut size={14} />
             Sign Out
