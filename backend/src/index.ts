@@ -19,7 +19,11 @@ app.use(helmet());
 app.use(
   cors({
     origin: (origin, callback) => {
-      const allowed = ["http://localhost:3000", "http://192.168.43.43:3000"];
+      const allowed = [
+        "http://localhost:3000",
+        "http://192.168.43.43:3000",
+        "https://bisu-procurement.vercel.app",
+      ];
       if (!origin || allowed.includes(origin)) {
         callback(null, true);
       } else {
@@ -39,14 +43,14 @@ app.get("/health", (_req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
-// Add this temporarily for testing
+//temporarily for testing
 router.get("/test-email", authMiddleware, async (req, res) => {
   try {
     const { sendMail } = await import("./services/mail-service");
     await sendMail({
       to: "ejiedaguplo06@gmail.com",
       subject: "BISU Procurement — Email Test",
-      html: "<h2>✅ Email is working!</h2><p>Your nodemailer config is correct.</p>",
+      html: "<h2>Email is working!</h2><p>Your nodemailer config is correct.</p>",
     });
     return res.json({ message: "Test email sent! Check your inbox." });
   } catch (err) {
