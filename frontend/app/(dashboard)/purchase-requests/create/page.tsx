@@ -323,7 +323,8 @@ export default function CreatePRPage() {
                       min={0}
                       step="0.01"
                       className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-bisu-blue/30 focus:border-bisu-blue transition-all"
-                      value={item.unit_price}
+                      placeholder="Price per unit"
+                      value={item.unit_price === 0 ? "" : item.unit_price}
                       onChange={(e) =>
                         updateItem(i, "unit_price", Number(e.target.value))
                       }
