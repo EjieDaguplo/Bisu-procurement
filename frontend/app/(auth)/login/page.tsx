@@ -15,7 +15,7 @@ interface Department {
   name: string;
 }
 
-// ── Password strength helper ─────────────────────────────────
+// Password strength helper─
 const getStrength = (pw: string) => {
   let score = 0;
   if (pw.length >= 8) score++;
@@ -165,7 +165,7 @@ export default function LoginPage() {
 
   return (
     <div className="h-screen flex overflow-hidden">
-      {/* ── Left panel ── */}
+      {/* Left panel */}
       <div className="hidden lg:flex w-1/2 h-screen flex-shrink-0 flex-col items-center justify-center px-12 bg-[#1A3A8F]">
         <Image
           src="/bisuLogo.png"
@@ -186,7 +186,7 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* ── Right panel ── */}
+      {/* Right panel */}
       <div className="flex-1 h-screen flex items-center justify-center px-6 py-8 bg-[#F7F8FC]">
         <div className="w-full max-w-sm max-h-full flex flex-col">
           {/* Mobile logo */}
@@ -198,12 +198,14 @@ export default function LoginPage() {
               height={64}
               className="rounded-full mb-2"
             />
-            <p className="text-[#1A3A8F] font-bold text-sm m-0">BISU – Bilar</p>
+            <p className="text-[#1A3A8F] font-bold text-sm m-0">
+              BISU – Bilar Campus
+            </p>
           </div>
 
           {/* Card */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-[0_2px_12px_rgba(26,58,143,0.08)] flex flex-col min-h-0 overflow-hidden">
-            {/* ── Tabs ── */}
+            {/* Tabs */}
             <div className="flex border-b border-gray-100 flex-shrink-0">
               {(["login", "register"] as Tab[]).map((t) => (
                 <button
@@ -227,7 +229,7 @@ export default function LoginPage() {
             </div>
 
             <div className="px-8 py-6 overflow-y-auto flex-1 min-h-0">
-              {/* ══════════ LOGIN FORM ══════════ */}
+              {/* LOGIN FORM */}
               {tab === "login" && (
                 <form onSubmit={handleLogin} className="flex flex-col gap-4">
                   <div>
@@ -311,11 +313,11 @@ export default function LoginPage() {
                 </form>
               )}
 
-              {/* ══════════ REGISTER FORM ══════════ */}
+              {/* REGISTER FORM */}
               {tab === "register" && (
                 <>
                   {regSuccess ? (
-                    /* ── Success state ── */
+                    /* Success state */
                     <div className="flex flex-col items-center text-center gap-4 py-4">
                       <div className="w-16 h-16 rounded-full bg-green-50 border-4 border-green-100 flex items-center justify-center">
                         <CheckCircle size={32} className="text-green-500" />
@@ -482,7 +484,7 @@ export default function LoginPage() {
                           </button>
                         </div>
 
-                        {/* ✅ Live password strength bar */}
+                        {/*Live password strength bar */}
                         {regPw && (
                           <div className="mt-2">
                             <div className="flex gap-1 mb-1">
