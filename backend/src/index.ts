@@ -60,9 +60,7 @@ router.get("/test-email", authMiddleware, async (req, res) => {
       .json({ message: "Email failed", error: String(err) });
   }
 });
-
 app.use(errorMiddleware);
-
 app.listen(PORT, "0.0.0.0", () => {
   console.log(`🚀 BISU Procurement API running on port ${PORT}`);
 });

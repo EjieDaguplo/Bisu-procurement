@@ -1,3 +1,4 @@
+//CHANGES
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
@@ -27,27 +28,26 @@ export const PRTable = ({ data, loading }: PRTableProps) => {
     {
       key: "pr_number",
       header: "PR Number",
-      render: (row: PurchaseRequest) => (
-        <span
-          style={{
-            fontFamily: "monospace",
-            fontWeight: 700,
-            color: "#1A3A8F",
-            fontSize: "0.75rem",
-          }}
-        >
-          {row.pr_number}
-        </span>
-      ),
+      render: (row: PurchaseRequest) =>
+        row.pr_number ? (
+          //Has PR number — fully approved
+          <span className="font-mono font-bold text-bisu-blue text-xs">
+            {row.pr_number}
+          </span>
+        ) : (
+          //No PR number yet — still in approval process
+          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.65rem] font-semibold bg-amber-100 text-amber-700 whitespace-nowrap">
+            Pending Approval
+          </span>
+        ),
     },
     {
       key: "title",
       header: "Title",
       render: (row: PurchaseRequest) => (
         <span
+          className="font-medium text-gray-800"
           style={{
-            fontWeight: 500,
-            color: "#1f2937",
             display: "-webkit-box",
             WebkitLineClamp: 1,
             WebkitBoxOrient: "vertical",
@@ -62,14 +62,23 @@ export const PRTable = ({ data, loading }: PRTableProps) => {
       key: "department",
       header: "Department",
       render: (row: PurchaseRequest) => (
-        <span style={{ color: "#4b5563" }}>{row.departments?.name || "—"}</span>
+        <div className="flex items-center gap-1.5">
+          {row.departments?.code && (
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[0.65rem] font-bold bg-bisu-blue/10 text-bisu-blue flex-shrink-0">
+              {row.departments.code}
+            </span>
+          )}
+          <span className="text-gray-500 text-xs truncate">
+            {row.departments?.name || "—"}
+          </span>
+        </div>
       ),
     },
     {
       key: "total_amount",
       header: "Amount",
       render: (row: PurchaseRequest) => (
-        <span style={{ fontWeight: 600, color: "#1f2937" }}>
+        <span className="font-semibold text-gray-800">
           ₱
           {Number(row.total_amount).toLocaleString("en-PH", {
             minimumFractionDigits: 2,
@@ -93,7 +102,7 @@ export const PRTable = ({ data, loading }: PRTableProps) => {
       key: "created_at",
       header: "Date",
       render: (row: PurchaseRequest) => (
-        <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>
+        <span className="text-xs text-gray-500">
           {new Date(row.created_at).toLocaleDateString("en-PH")}
         </span>
       ),
@@ -110,10 +119,8 @@ export const PRTable = ({ data, loading }: PRTableProps) => {
         onRowClick={(row) => router.push(`/purchase-requests/${row.id}`)}
       />
 
-      {/* Only show pagination controls when there is more than one page */}
       {!loading && pg.totalPages > 1 && (
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-1">
-          {/* Summary */}
           <p className="text-xs text-gray-400">
             Showing{" "}
             <span className="font-semibold text-gray-600">
@@ -123,8 +130,6 @@ export const PRTable = ({ data, loading }: PRTableProps) => {
             <span className="font-semibold text-gray-600">{pg.totalItems}</span>{" "}
             requests
           </p>
-
-          {/* Controls */}
           <Pagination
             {...pg}
             showInfo={false}

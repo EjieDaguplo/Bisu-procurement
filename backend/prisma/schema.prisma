@@ -76,7 +76,7 @@ model item_categories {
 
 model purchase_requests {
   id              Int       @id @default(autoincrement()) @db.UnsignedInt
-  pr_number       String    @unique @db.VarChar(30)
+  pr_number       String?    @unique @db.VarChar(30)
   title           String    @db.VarChar(255)
   purpose         String    @db.Text
   requested_by    Int       @db.UnsignedInt

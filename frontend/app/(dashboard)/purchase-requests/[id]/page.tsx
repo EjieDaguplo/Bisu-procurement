@@ -1,5 +1,4 @@
-//this is the detail page for a single purchase request, showing its details, line items, and tracking logs. It also allows the owner to submit or cancel the PR, and allows the owner or admin to delete the PR (soft delete for owner if DRAFT, force delete for admin at any status).
-//C:\Users\ejiedags\Desktop\bisu-procurement\frontend\app\(dashboard)\purchase-requests\[id]\page.tsx
+//CHANGES
 "use client";
 import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
@@ -7,7 +6,14 @@ import { PageWrapper } from "@/src/components/layout/PageWrapper";
 import { StatusBadge, PriorityBadge } from "@/src/components/ui/Badge";
 import { api } from "@/src/lib/api";
 import { PurchaseRequest, TrackingLog } from "@/src/types";
-import { ArrowLeft, Send, XCircle, Trash2, ShieldAlert } from "lucide-react";
+import {
+  ArrowLeft,
+  Send,
+  XCircle,
+  Trash2,
+  ShieldAlert,
+  Hash,
+} from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "@/src/hooks/useAuth";
 
@@ -23,8 +29,6 @@ export default function PRDetailPage() {
   const [submitting, setSubmitting] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [deleting, setDeleting] = useState(false);
-
-  // Confirm dialog state
   const [confirmDelete, setConfirmDelete] = useState<"soft" | "force" | null>(
     null,
   );
@@ -38,16 +42,11 @@ export default function PRDetailPage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  // ── Derived permissions ──────────────────────────────────────────────────
   const isAdmin = user?.role === "ADMIN";
-  // Owner = the user who created this PR
   const isOwner = user?.id === pr?.requested_by;
-  // Owner can soft-delete only while DRAFT
   const canSoftDelete = isOwner && pr?.status === "DRAFT";
-  // Admin can force-delete at any status
   const canForceDelete = isAdmin;
 
-  // ── Actions ──────────────────────────────────────────────────────────────
   const submit = async () => {
     setSubmitting(true);
     try {
@@ -69,7 +68,6 @@ export default function PRDetailPage() {
     }
   };
 
-  // Owner soft-delete (DRAFT only) → DELETE /purchase-requests/:id
   const handleSoftDelete = async () => {
     setDeleting(true);
     try {
@@ -83,7 +81,6 @@ export default function PRDetailPage() {
     }
   };
 
-  // Admin force-delete (any status, full cascade) → DELETE /purchase-requests/:id/force
   const handleForceDelete = async () => {
     setDeleting(true);
     try {
@@ -97,7 +94,6 @@ export default function PRDetailPage() {
     }
   };
 
-  // ── Render guards ─────────────────────────────────────────────────────────
   if (loading)
     return (
       <div className="flex items-center justify-center p-12 text-gray-400">
@@ -115,14 +111,14 @@ export default function PRDetailPage() {
   const lineItems = pr.pr_line_items ?? [];
 
   return (
-    <PageWrapper title={`PR Detail — ${pr.pr_number}`}>
+    //page title uses ID when no PR number assigned yet
+    <PageWrapper
+      title={pr.pr_number ? `PR — ${pr.pr_number}` : `Request #${id}`}
+    >
       <div className="flex flex-col gap-6 max-w-6xl">
-        {/* ── Inline confirm dialogs ── */}
+        {/* ── Confirm delete banner ── */}
         {confirmDelete && (
-          <div
-            className="rounded-xl border px-5 py-4 flex items-start gap-4 shadow-sm
-            bg-red-50 border-red-200"
-          >
+          <div className="rounded-xl border px-5 py-4 flex items-start gap-4 shadow-sm bg-red-50 border-red-200">
             <div className="flex-1">
               {confirmDelete === "force" ? (
                 <>
@@ -131,19 +127,21 @@ export default function PRDetailPage() {
                   </p>
                   <p className="text-xs text-red-600">
                     This will remove{" "}
-                    <span className="font-semibold">{pr.pr_number}</span> and
-                    all its line items, approvals, tracking logs, and
+                    <span className="font-semibold">
+                      {pr.pr_number ?? `Request #${id}`}
+                    </span>{" "}
+                    and all its line items, approvals, tracking logs, and
                     notifications. This cannot be undone.
                   </p>
                 </>
               ) : (
                 <>
                   <p className="font-bold text-red-700 text-sm mb-0.5">
-                    Delete this draft PR?
+                    Delete this draft?
                   </p>
                   <p className="text-xs text-red-600">
-                    <span className="font-semibold">{pr.pr_number}</span> will
-                    be permanently removed.
+                    <span className="font-semibold">Request #{id}</span> will be
+                    permanently removed.
                   </p>
                 </>
               )}
@@ -187,15 +185,23 @@ export default function PRDetailPage() {
             <div className="flex items-center gap-2 flex-wrap">
               <StatusBadge status={pr.status} />
               <PriorityBadge priority={pr.priority} />
-              <span className="text-xs text-gray-400 font-mono">
-                {pr.pr_number}
-              </span>
+
+              {/*PR number shown only when assigned (APPROVED) */}
+              {pr.pr_number ? (
+                <span className="inline-flex items-center gap-1 text-xs font-mono font-bold text-bisu-blue bg-bisu-blue/10 px-2 py-0.5 rounded-full">
+                  <Hash size={11} />
+                  {pr.pr_number}
+                </span>
+              ) : (
+                <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.65rem] font-semibold bg-amber-100 text-amber-700">
+                  No PR Number — Pending Approval
+                </span>
+              )}
             </div>
           </div>
 
           {/* Action buttons */}
           <div className="flex gap-2 flex-shrink-0 flex-wrap justify-end">
-            {/* Submit + Cancel — owner, DRAFT only */}
             {pr.status === "DRAFT" && isOwner && (
               <>
                 <button
@@ -216,24 +222,20 @@ export default function PRDetailPage() {
               </>
             )}
 
-            {/* Owner soft-delete — DRAFT only, not shown if admin (admin has force-delete) */}
             {canSoftDelete && !isAdmin && (
               <button
                 onClick={() => setConfirmDelete("soft")}
                 disabled={deleting || !!confirmDelete}
-                title="Delete this draft"
                 className="inline-flex items-center gap-2 border border-red-200 text-red-600 hover:bg-red-50 font-semibold text-sm px-4 py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Trash2 size={15} /> Delete
               </button>
             )}
 
-            {/* Admin force-delete — any status */}
             {canForceDelete && (
               <button
                 onClick={() => setConfirmDelete("force")}
                 disabled={deleting || !!confirmDelete}
-                title="Admin: permanently delete this PR and all related records"
                 className="inline-flex items-center gap-2 bg-red-700 hover:bg-red-800 text-white font-semibold text-sm px-4 py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ShieldAlert size={15} /> Force Delete
@@ -252,12 +254,34 @@ export default function PRDetailPage() {
                 Request Details
               </h3>
               <div className="grid grid-cols-2 gap-4">
+                {/*Added PR Number row — only shows when approved */}
+                {pr.pr_number && (
+                  <div className="col-span-2 bg-green-50 rounded-lg px-4 py-3 border border-green-200 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                      <Hash size={16} className="text-green-600" />
+                    </div>
+                    <div>
+                      <p className="text-xs text-green-600 font-medium mb-0.5">
+                        Official PR Number
+                      </p>
+                      <p className="font-mono font-extrabold text-green-700 text-lg leading-none">
+                        {pr.pr_number}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
                 {[
                   {
                     label: "Requested By",
                     value: `${pr.users?.first_name} ${pr.users?.last_name}`,
                   },
-                  { label: "Department", value: pr.departments?.name ?? "—" },
+                  {
+                    label: "Department",
+                    value: pr.departments
+                      ? `${pr.departments.name} (${(pr.departments as { code?: string }).code ?? ""})`
+                      : "—",
+                  },
                   {
                     label: "Date Needed",
                     value: pr.date_needed
@@ -275,16 +299,13 @@ export default function PRDetailPage() {
                       {label}
                     </p>
                     <p
-                      className={`font-semibold text-sm ${
-                        highlight
-                          ? "text-bisu-blue text-base font-bold"
-                          : "text-gray-800"
-                      }`}
+                      className={`font-semibold text-sm ${highlight ? "text-bisu-blue text-base font-bold" : "text-gray-800"}`}
                     >
                       {value}
                     </p>
                   </div>
                 ))}
+
                 <div className="col-span-2">
                   <p className="text-xs text-gray-400 font-medium mb-0.5">
                     Purpose
@@ -293,6 +314,7 @@ export default function PRDetailPage() {
                     {pr.purpose}
                   </p>
                 </div>
+
                 {pr.remarks && (
                   <div className="col-span-2">
                     <p className="text-xs text-gray-400 font-medium mb-0.5">
@@ -304,7 +326,7 @@ export default function PRDetailPage() {
               </div>
             </div>
 
-            {/* Line Items — no pagination; all items shown (this is a detail view) */}
+            {/* Line Items */}
             <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm">
               <h3 className="font-bold text-bisu-blue text-base mb-4">
                 Items
@@ -338,9 +360,7 @@ export default function PRDetailPage() {
                     {lineItems.map((item, i) => (
                       <tr
                         key={i}
-                        className={`border-b border-gray-50 ${
-                          i % 2 === 0 ? "bg-white" : "bg-gray-50/50"
-                        }`}
+                        className={`border-b border-gray-50 ${i % 2 === 0 ? "bg-white" : "bg-gray-50/50"}`}
                       >
                         <td className="px-3 py-2.5 text-gray-800">
                           {item.description}
@@ -389,7 +409,7 @@ export default function PRDetailPage() {
             </div>
           </div>
 
-          {/* Right: tracking — all logs, no pagination on detail view */}
+          {/* Right: tracking */}
           <div className="bg-white rounded-xl border border-gray-100 p-6 shadow-sm self-start">
             <h3 className="font-bold text-bisu-blue text-base mb-4">
               Document Trail
@@ -399,6 +419,60 @@ export default function PRDetailPage() {
                 </span>
               )}
             </h3>
+
+            {/*Approval status progress — shows which steps are done */}
+            {pr.status !== "DRAFT" && (
+              <div className="mb-4 pb-4 border-b border-gray-100">
+                <p className="text-xs font-semibold text-gray-500 mb-2">
+                  Approval Progress
+                </p>
+                {pr.status === "APPROVED" ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0">
+                      <svg
+                        width="10"
+                        height="10"
+                        viewBox="0 0 10 10"
+                        fill="none"
+                      >
+                        <path
+                          d="M2 5l2.5 2.5L8 3"
+                          stroke="white"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-xs font-bold text-green-700">
+                        Fully Approved
+                      </p>
+                      {pr.pr_number && (
+                        <p className="text-[0.65rem] text-green-600 font-mono font-semibold">
+                          {pr.pr_number}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ) : pr.status === "REJECTED" ? (
+                  <div className="flex items-center gap-2">
+                    <div className="w-5 h-5 rounded-full bg-red-500 flex items-center justify-center flex-shrink-0">
+                      <XCircle size={12} color="white" />
+                    </div>
+                    <p className="text-xs font-bold text-red-600">Rejected</p>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                    <p className="text-xs font-medium text-amber-700">
+                      {pr.status === "SUBMITTED"
+                        ? "Awaiting Step 1 Review"
+                        : "Under Review"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
 
             {trackingLogs.length ? (
               <div className="flex flex-col">

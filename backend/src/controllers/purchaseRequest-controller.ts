@@ -1,14 +1,16 @@
 import { Response } from "express";
 import { prisma } from "../config/database";
 import { AuthRequest } from "../types";
-import { Decimal } from "../../generated/prisma/internal/prismaNamespace";
-import {
-  notifyPRSubmitted,
-  notifyApproverPending,
-} from "../services/notification-service";
-const generatePRNumber = async () => {
+
+//Generate PR number only when fully APPROVED
+const generatePRNumber = async (): Promise<string> => {
   const year = new Date().getFullYear();
-  const count = await prisma.purchase_requests.count();
+
+  // Count only PRs that already have a pr_number assigned
+  const count = await prisma.purchase_requests.count({
+    where: { pr_number: { not: null } },
+  });
+
   return `PR-${year}-${String(count + 1).padStart(5, "0")}`;
 };
 
@@ -87,15 +89,14 @@ export const createPR = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    const pr_number = await generatePRNumber();
-
     const totalAmount = (
       line_items as { quantity: number; unit_price: number }[]
     ).reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
 
+    //pr_number is NULL until the PR is fully approved
     const pr = await prisma.purchase_requests.create({
       data: {
-        pr_number,
+        pr_number: null, // ← no number yet
         title,
         purpose,
         requested_by: req.user!.userId,
@@ -130,13 +131,12 @@ export const updatePR = async (req: AuthRequest, res: Response) => {
 
     const { line_items, ...rest } = req.body;
 
-    // Recalculate total if line items are updated
     let total_amount = pr.total_amount;
     if (line_items?.length) {
       const calculated = (
         line_items as { quantity: number; unit_price: number }[]
       ).reduce((sum, item) => sum + item.quantity * item.unit_price, 0);
-      total_amount = new Decimal(calculated);
+      total_amount = calculated as unknown as typeof pr.total_amount;
     }
 
     const updated = await prisma.purchase_requests.update({
@@ -182,6 +182,7 @@ export const deletePR = async (req: AuthRequest, res: Response) => {
 export const submitPR = async (req: AuthRequest, res: Response) => {
   try {
     const prId = Number(req.params.id);
+
     const pr = await prisma.purchase_requests.findUnique({
       where: { id: prId },
     });
@@ -195,18 +196,23 @@ export const submitPR = async (req: AuthRequest, res: Response) => {
       where: { is_active: true },
       orderBy: { step_order: "asc" },
     });
-    if (!steps.length)
-      return res.status(400).json({ message: "No approval steps configured." });
+    if (steps.length === 0)
+      return res
+        .status(400)
+        .json({
+          message: "No approval steps configured. Please contact admin.",
+        });
 
+    //Still no pr_number assigned — just change status
     const updated = await prisma.purchase_requests.update({
       where: { id: prId },
       data: { status: "SUBMITTED" },
     });
 
     await prisma.pr_approvals.createMany({
-      data: steps.map((s) => ({
+      data: steps.map((step) => ({
         purchase_request_id: prId,
-        approval_step_id: s.id,
+        approval_step_id: step.id,
         action: "PENDING" as const,
       })),
     });
@@ -224,40 +230,32 @@ export const submitPR = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    // Get requester info for email
-    const requester = await prisma.users.findUnique({
-      where: { id: req.user!.userId },
+    await prisma.notifications.create({
+      data: {
+        user_id: req.user!.userId,
+        purchase_request_id: prId,
+        type: "PR_SUBMITTED",
+        title: "PR Submitted Successfully",
+        //No pr_number yet — reference by internal ID
+        message: `Your Purchase Request (ID #${prId}) — "${updated.title}" has been submitted and is awaiting approval.`,
+      },
     });
-    const requesterName = `${requester?.first_name} ${requester?.last_name}`;
 
-    // Notify requester (in-app + email)
-    await notifyPRSubmitted(
-      req.user!.userId,
-      prId,
-      updated.pr_number,
-      updated.title,
-      Number(updated.total_amount),
-      requesterName,
-    );
-
-    // Notify first-step approvers (in-app + email)
-    const firstApprovers = await prisma.users.findMany({
+    const firstStepApprovers = await prisma.users.findMany({
       where: { role_id: steps[0].role_id, is_active: true },
     });
-    await Promise.all(
-      firstApprovers.map((a) =>
-        notifyApproverPending(
-          a.id,
-          prId,
-          updated.pr_number,
-          updated.title,
-          Number(updated.total_amount),
-          `${a.first_name} ${a.last_name}`,
-          requesterName,
-          steps[0].step_name,
-        ),
-      ),
-    );
+
+    if (firstStepApprovers.length > 0) {
+      await prisma.notifications.createMany({
+        data: firstStepApprovers.map((approver) => ({
+          user_id: approver.id,
+          purchase_request_id: prId,
+          type: "PENDING_ACTION" as const,
+          title: "New PR Awaiting Your Approval",
+          message: `A Purchase Request (ID #${prId}) — "${updated.title}" has been submitted and requires your review at step "${steps[0].step_name}".`,
+        })),
+      });
+    }
 
     return res.json(updated);
   } catch (err) {
@@ -273,7 +271,6 @@ export const cancelPR = async (req: AuthRequest, res: Response) => {
     const pr = await prisma.purchase_requests.findUnique({
       where: { id: prId },
     });
-
     if (!pr) return res.status(404).json({ message: "PR not found" });
     if (!["DRAFT", "SUBMITTED"].includes(pr.status)) {
       return res
@@ -286,12 +283,8 @@ export const cancelPR = async (req: AuthRequest, res: Response) => {
       data: { status: "CANCELLED" },
     });
 
-    // Cancel any pending approval records too
     await prisma.pr_approvals.updateMany({
-      where: {
-        purchase_request_id: prId,
-        action: "PENDING",
-      },
+      where: { purchase_request_id: prId, action: "PENDING" },
       data: { action: "REJECTED" },
     });
 
@@ -312,7 +305,8 @@ export const cancelPR = async (req: AuthRequest, res: Response) => {
     return res.status(500).json({ message: "Server error" });
   }
 };
-//Admin force-delete a PR and ALL its cascade records
+
+//Admin force-delete a PR and all cascade records
 export const adminDeletePR = async (req: AuthRequest, res: Response) => {
   try {
     const prId = Number(req.params.id);
@@ -322,44 +316,25 @@ export const adminDeletePR = async (req: AuthRequest, res: Response) => {
     });
     if (!pr) return res.status(404).json({ message: "PR not found" });
 
-    // Delete in correct dependency order
-
-    // 1. ML classifications
     await prisma.ml_classifications.deleteMany({
       where: { purchase_request_id: prId },
     });
-
-    // 2. Notifications linked to this PR
     await prisma.notifications.deleteMany({
       where: { purchase_request_id: prId },
     });
-
-    // 3. Tracking logs
     await prisma.tracking_logs.deleteMany({
       where: { purchase_request_id: prId },
     });
-
-    // 4. PR approvals
     await prisma.pr_approvals.deleteMany({
       where: { purchase_request_id: prId },
     });
-
-    // 5. PR line items
     await prisma.pr_line_items.deleteMany({
       where: { purchase_request_id: prId },
     });
-
-    // 6. Delete the PR itself
-    await prisma.purchase_requests.delete({
-      where: { id: prId },
-    });
+    await prisma.purchase_requests.delete({ where: { id: prId } });
 
     return res.json({
-      message: `PR ${pr.pr_number} and all associated records have been permanently deleted.`,
-      deleted: {
-        pr_number: pr.pr_number,
-        pr_id: prId,
-      },
+      message: `Purchase Request (ID #${prId}) and all associated records have been permanently deleted.`,
     });
   } catch (err) {
     console.error("ADMIN DELETE PR ERROR:", err);

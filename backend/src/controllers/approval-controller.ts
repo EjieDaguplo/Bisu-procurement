@@ -1,13 +1,20 @@
+//CHANGES
 import { Response } from "express";
 import { prisma } from "../config/database";
 import { AuthRequest } from "../types";
 import {
-  notifyPRApproved,
   notifyPRRejected,
   notifyPRReturned,
-  notifyPRStepApproved,
-  notifyApproverPending,
 } from "../services/notification-service";
+
+// Only called when PR is fully approved
+const generatePRNumber = async (): Promise<string> => {
+  const year = new Date().getFullYear();
+  const count = await prisma.purchase_requests.count({
+    where: { pr_number: { not: null } },
+  });
+  return `PR-${year}-${String(count + 1).padStart(5, "0")}`;
+};
 
 export const getPendingApprovals = async (req: AuthRequest, res: Response) => {
   try {
@@ -15,7 +22,6 @@ export const getPendingApprovals = async (req: AuthRequest, res: Response) => {
       where: { id: req.user!.userId },
       include: { roles: true },
     });
-
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const matchingSteps = await prisma.approval_steps.findMany({
@@ -42,25 +48,30 @@ export const getPendingApprovals = async (req: AuthRequest, res: Response) => {
       orderBy: { created_at: "desc" },
     });
 
-    // Only show approvals where all previous steps are already approved
-    const visible = await Promise.all(
-      allPending.map(async (approval) => {
-        const thisStepOrder = approval.approval_steps.step_order;
+    // Batch fetch all pending for the relevant PRs — avoids broken nested filter
+    const prIds = [...new Set(allPending.map((a) => a.purchase_request_id))];
 
-        const blockedByPrevious = await prisma.pr_approvals.findFirst({
-          where: {
-            purchase_request_id: approval.purchase_request_id,
-            action: "PENDING",
-            approval_steps: { step_order: { lt: thisStepOrder } },
-          },
-          include: { approval_steps: true },
-        });
+    const allPendingForThesePRs = await prisma.pr_approvals.findMany({
+      where: {
+        purchase_request_id: { in: prIds },
+        action: "PENDING",
+      },
+      include: { approval_steps: true },
+    });
 
-        return blockedByPrevious ? null : approval;
-      }),
-    );
+    // JS comparison — correct and no N+1 queries
+    const visible = allPending.filter((approval) => {
+      const thisStepOrder = approval.approval_steps.step_order;
+      const blockedByPrevious = allPendingForThesePRs.some(
+        (other) =>
+          other.purchase_request_id === approval.purchase_request_id &&
+          other.id !== approval.id &&
+          other.approval_steps.step_order < thisStepOrder,
+      );
+      return !blockedByPrevious;
+    });
 
-    return res.json(visible.filter(Boolean));
+    return res.json(visible);
   } catch (err) {
     console.error("GET PENDING APPROVALS ERROR:", err);
     return res.status(500).json({ message: "Server error" });
@@ -96,14 +107,9 @@ export const approvePR = async (req: AuthRequest, res: Response) => {
         remarks,
         acted_at: new Date(),
       },
-      include: {
-        approval_steps: true,
-        //include total_amount so email template can use it
-        purchase_requests: true,
-      },
+      include: { approval_steps: true, purchase_requests: true },
     });
 
-    // Check if any more steps are still PENDING
     const nextPending = await prisma.pr_approvals.findFirst({
       where: {
         purchase_request_id: approval.purchase_request_id,
@@ -115,9 +121,18 @@ export const approvePR = async (req: AuthRequest, res: Response) => {
 
     const newStatus = nextPending ? "UNDER_REVIEW" : "APPROVED";
 
+    // Only generate PR number on final approval
+    let assignedPRNumber: string | null = null;
+    if (newStatus === "APPROVED") {
+      assignedPRNumber = await generatePRNumber();
+    }
+
     await prisma.purchase_requests.update({
       where: { id: approval.purchase_request_id },
-      data: { status: newStatus },
+      data: {
+        status: newStatus,
+        ...(assignedPRNumber && { pr_number: assignedPRNumber }),
+      },
     });
 
     await prisma.tracking_logs.create({
@@ -134,38 +149,30 @@ export const approvePR = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    //Get requester info for email
-    const requester = await prisma.users.findUnique({
-      where: { id: approval.purchase_requests.requested_by },
-    });
-    const requesterName =
-      `${requester?.first_name ?? ""} ${requester?.last_name ?? ""}`.trim();
-    const prAmount = Number(approval.purchase_requests.total_amount);
+    const prId = approval.purchase_request_id;
+    const prTitle = approval.purchase_requests.title;
 
-    if (newStatus === "APPROVED") {
-      //Fully approved — notify requester
-      await notifyPRApproved(
-        approval.purchase_requests.requested_by,
-        approval.purchase_request_id,
-        approval.purchase_requests.pr_number,
-        approval.purchase_requests.title,
-        prAmount,
-        requesterName,
-      );
+    if (newStatus === "APPROVED" && assignedPRNumber) {
+      await prisma.notifications.create({
+        data: {
+          user_id: approval.purchase_requests.requested_by,
+          purchase_request_id: prId,
+          type: "PR_APPROVED",
+          title: "Purchase Request Fully Approved 🎉",
+          message: `Your Purchase Request "${prTitle}" has been fully approved! Official PR Number assigned: ${assignedPRNumber}`,
+        },
+      });
     } else {
-      //Step approved, more steps remain — notify requester of progress
-      await notifyPRStepApproved(
-        approval.purchase_requests.requested_by,
-        approval.purchase_request_id,
-        approval.purchase_requests.pr_number,
-        approval.purchase_requests.title,
-        prAmount,
-        requesterName,
-        approval.approval_steps.step_name,
-        nextPending?.approval_steps.step_name ?? "Next Step",
-      );
+      await prisma.notifications.create({
+        data: {
+          user_id: approval.purchase_requests.requested_by,
+          purchase_request_id: prId,
+          type: "PENDING_ACTION",
+          title: `Step Approved: ${approval.approval_steps.step_name}`,
+          message: `Your Purchase Request (ID #${prId}) "${prTitle}" passed "${approval.approval_steps.step_name}" and is now at "${nextPending?.approval_steps.step_name}".`,
+        },
+      });
 
-      //Notify next step approvers
       if (nextPending) {
         const nextApprovers = await prisma.users.findMany({
           where: {
@@ -173,25 +180,23 @@ export const approvePR = async (req: AuthRequest, res: Response) => {
             is_active: true,
           },
         });
-
         await Promise.all(
           nextApprovers.map((approver) =>
-            notifyApproverPending(
-              approver.id,
-              approval.purchase_request_id,
-              approval.purchase_requests.pr_number,
-              approval.purchase_requests.title,
-              prAmount,
-              `${approver.first_name} ${approver.last_name}`,
-              requesterName,
-              nextPending.approval_steps.step_name,
-            ),
+            prisma.notifications.create({
+              data: {
+                user_id: approver.id,
+                purchase_request_id: prId,
+                type: "PENDING_ACTION",
+                title: "PR Awaiting Your Approval",
+                message: `Purchase Request (ID #${prId}) "${prTitle}" has reached your step: "${nextPending.approval_steps.step_name}".`,
+              },
+            }),
           ),
         );
       }
     }
 
-    return res.json({ ...approval, newStatus });
+    return res.json({ ...approval, newStatus, pr_number: assignedPRNumber });
   } catch (err) {
     console.error("APPROVE PR ERROR:", err);
     return res.status(500).json({ message: "Server error" });
@@ -210,10 +215,7 @@ export const rejectPR = async (req: AuthRequest, res: Response) => {
         remarks,
         acted_at: new Date(),
       },
-      include: {
-        approval_steps: true,
-        purchase_requests: true,
-      },
+      include: { approval_steps: true, purchase_requests: true },
     });
 
     await prisma.purchase_requests.update({
@@ -233,17 +235,18 @@ export const rejectPR = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    //Get requester info for email
     const requester = await prisma.users.findUnique({
       where: { id: approval.purchase_requests.requested_by },
     });
     const requesterName =
       `${requester?.first_name ?? ""} ${requester?.last_name ?? ""}`.trim();
 
+    // pr_number may be null — pass a fallback label for the email
     await notifyPRRejected(
       approval.purchase_requests.requested_by,
       approval.purchase_request_id,
-      approval.purchase_requests.pr_number,
+      approval.purchase_requests.pr_number ??
+        `Request #${approval.purchase_request_id}`,
       approval.purchase_requests.title,
       Number(approval.purchase_requests.total_amount),
       requesterName,
@@ -269,10 +272,7 @@ export const returnPR = async (req: AuthRequest, res: Response) => {
         remarks,
         acted_at: new Date(),
       },
-      include: {
-        approval_steps: true,
-        purchase_requests: true,
-      },
+      include: { approval_steps: true, purchase_requests: true },
     });
 
     await prisma.purchase_requests.update({
@@ -280,7 +280,7 @@ export const returnPR = async (req: AuthRequest, res: Response) => {
       data: { status: "DRAFT" },
     });
 
-    //Reset all PENDING approval steps for this PR so it can be resubmitted cleanly
+    // Reset all pending steps so PR can be resubmitted cleanly
     await prisma.pr_approvals.deleteMany({
       where: {
         purchase_request_id: approval.purchase_request_id,
@@ -300,17 +300,18 @@ export const returnPR = async (req: AuthRequest, res: Response) => {
       },
     });
 
-    //Get requester info for email
     const requester = await prisma.users.findUnique({
       where: { id: approval.purchase_requests.requested_by },
     });
     const requesterName =
       `${requester?.first_name ?? ""} ${requester?.last_name ?? ""}`.trim();
 
+    // pr_number may be null — pass fallback label
     await notifyPRReturned(
       approval.purchase_requests.requested_by,
       approval.purchase_request_id,
-      approval.purchase_requests.pr_number,
+      approval.purchase_requests.pr_number ??
+        `Request #${approval.purchase_request_id}`,
       approval.purchase_requests.title,
       Number(approval.purchase_requests.total_amount),
       requesterName,

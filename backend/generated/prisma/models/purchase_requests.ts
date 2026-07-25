@@ -263,7 +263,7 @@ export type purchase_requestsGroupByArgs<ExtArgs extends runtime.Types.Extension
 
 export type Purchase_requestsGroupByOutputType = {
   id: number
-  pr_number: string
+  pr_number: string | null
   title: string
   purpose: string
   requested_by: number
@@ -305,7 +305,7 @@ export type purchase_requestsWhereInput = {
   OR?: Prisma.purchase_requestsWhereInput[]
   NOT?: Prisma.purchase_requestsWhereInput | Prisma.purchase_requestsWhereInput[]
   id?: Prisma.IntFilter<"purchase_requests"> | number
-  pr_number?: Prisma.StringFilter<"purchase_requests"> | string
+  pr_number?: Prisma.StringNullableFilter<"purchase_requests"> | string | null
   title?: Prisma.StringFilter<"purchase_requests"> | string
   purpose?: Prisma.StringFilter<"purchase_requests"> | string
   requested_by?: Prisma.IntFilter<"purchase_requests"> | number
@@ -332,7 +332,7 @@ export type purchase_requestsWhereInput = {
 
 export type purchase_requestsOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  pr_number?: Prisma.SortOrder
+  pr_number?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrder
   purpose?: Prisma.SortOrder
   requested_by?: Prisma.SortOrder
@@ -390,7 +390,7 @@ export type purchase_requestsWhereUniqueInput = Prisma.AtLeast<{
 
 export type purchase_requestsOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  pr_number?: Prisma.SortOrder
+  pr_number?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrder
   purpose?: Prisma.SortOrder
   requested_by?: Prisma.SortOrder
@@ -417,7 +417,7 @@ export type purchase_requestsScalarWhereWithAggregatesInput = {
   OR?: Prisma.purchase_requestsScalarWhereWithAggregatesInput[]
   NOT?: Prisma.purchase_requestsScalarWhereWithAggregatesInput | Prisma.purchase_requestsScalarWhereWithAggregatesInput[]
   id?: Prisma.IntWithAggregatesFilter<"purchase_requests"> | number
-  pr_number?: Prisma.StringWithAggregatesFilter<"purchase_requests"> | string
+  pr_number?: Prisma.StringNullableWithAggregatesFilter<"purchase_requests"> | string | null
   title?: Prisma.StringWithAggregatesFilter<"purchase_requests"> | string
   purpose?: Prisma.StringWithAggregatesFilter<"purchase_requests"> | string
   requested_by?: Prisma.IntWithAggregatesFilter<"purchase_requests"> | number
@@ -435,7 +435,7 @@ export type purchase_requestsScalarWhereWithAggregatesInput = {
 }
 
 export type purchase_requestsCreateInput = {
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -459,7 +459,7 @@ export type purchase_requestsCreateInput = {
 
 export type purchase_requestsUncheckedCreateInput = {
   id?: number
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   requested_by: number
@@ -482,7 +482,7 @@ export type purchase_requestsUncheckedCreateInput = {
 }
 
 export type purchase_requestsUpdateInput = {
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -506,7 +506,7 @@ export type purchase_requestsUpdateInput = {
 
 export type purchase_requestsUncheckedUpdateInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by?: Prisma.IntFieldUpdateOperationsInput | number
@@ -530,7 +530,7 @@ export type purchase_requestsUncheckedUpdateInput = {
 
 export type purchase_requestsCreateManyInput = {
   id?: number
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   requested_by: number
@@ -548,7 +548,7 @@ export type purchase_requestsCreateManyInput = {
 }
 
 export type purchase_requestsUpdateManyMutationInput = {
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -564,7 +564,7 @@ export type purchase_requestsUpdateManyMutationInput = {
 
 export type purchase_requestsUncheckedUpdateManyInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by?: Prisma.IntFieldUpdateOperationsInput | number
@@ -907,7 +907,7 @@ export type purchase_requestsUpdateOneRequiredWithoutMl_classificationsNestedInp
 }
 
 export type purchase_requestsCreateWithoutDepartmentsInput = {
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -930,7 +930,7 @@ export type purchase_requestsCreateWithoutDepartmentsInput = {
 
 export type purchase_requestsUncheckedCreateWithoutDepartmentsInput = {
   id?: number
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   requested_by: number
@@ -982,7 +982,7 @@ export type purchase_requestsScalarWhereInput = {
   OR?: Prisma.purchase_requestsScalarWhereInput[]
   NOT?: Prisma.purchase_requestsScalarWhereInput | Prisma.purchase_requestsScalarWhereInput[]
   id?: Prisma.IntFilter<"purchase_requests"> | number
-  pr_number?: Prisma.StringFilter<"purchase_requests"> | string
+  pr_number?: Prisma.StringNullableFilter<"purchase_requests"> | string | null
   title?: Prisma.StringFilter<"purchase_requests"> | string
   purpose?: Prisma.StringFilter<"purchase_requests"> | string
   requested_by?: Prisma.IntFilter<"purchase_requests"> | number
@@ -1000,7 +1000,7 @@ export type purchase_requestsScalarWhereInput = {
 }
 
 export type purchase_requestsCreateWithoutUsersInput = {
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1023,7 +1023,7 @@ export type purchase_requestsCreateWithoutUsersInput = {
 
 export type purchase_requestsUncheckedCreateWithoutUsersInput = {
   id?: number
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   department_id: number
@@ -1071,7 +1071,7 @@ export type purchase_requestsUpdateManyWithWhereWithoutUsersInput = {
 }
 
 export type purchase_requestsCreateWithoutItem_categoriesInput = {
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1094,7 +1094,7 @@ export type purchase_requestsCreateWithoutItem_categoriesInput = {
 
 export type purchase_requestsUncheckedCreateWithoutItem_categoriesInput = {
   id?: number
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   requested_by: number
@@ -1142,7 +1142,7 @@ export type purchase_requestsUpdateManyWithWhereWithoutItem_categoriesInput = {
 }
 
 export type purchase_requestsCreateWithoutPr_line_itemsInput = {
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1165,7 +1165,7 @@ export type purchase_requestsCreateWithoutPr_line_itemsInput = {
 
 export type purchase_requestsUncheckedCreateWithoutPr_line_itemsInput = {
   id?: number
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   requested_by: number
@@ -1203,7 +1203,7 @@ export type purchase_requestsUpdateToOneWithWhereWithoutPr_line_itemsInput = {
 }
 
 export type purchase_requestsUpdateWithoutPr_line_itemsInput = {
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1226,7 +1226,7 @@ export type purchase_requestsUpdateWithoutPr_line_itemsInput = {
 
 export type purchase_requestsUncheckedUpdateWithoutPr_line_itemsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1248,7 +1248,7 @@ export type purchase_requestsUncheckedUpdateWithoutPr_line_itemsInput = {
 }
 
 export type purchase_requestsCreateWithoutPr_approvalsInput = {
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1271,7 +1271,7 @@ export type purchase_requestsCreateWithoutPr_approvalsInput = {
 
 export type purchase_requestsUncheckedCreateWithoutPr_approvalsInput = {
   id?: number
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   requested_by: number
@@ -1309,7 +1309,7 @@ export type purchase_requestsUpdateToOneWithWhereWithoutPr_approvalsInput = {
 }
 
 export type purchase_requestsUpdateWithoutPr_approvalsInput = {
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1332,7 +1332,7 @@ export type purchase_requestsUpdateWithoutPr_approvalsInput = {
 
 export type purchase_requestsUncheckedUpdateWithoutPr_approvalsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1354,7 +1354,7 @@ export type purchase_requestsUncheckedUpdateWithoutPr_approvalsInput = {
 }
 
 export type purchase_requestsCreateWithoutTracking_logsInput = {
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1377,7 +1377,7 @@ export type purchase_requestsCreateWithoutTracking_logsInput = {
 
 export type purchase_requestsUncheckedCreateWithoutTracking_logsInput = {
   id?: number
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   requested_by: number
@@ -1415,7 +1415,7 @@ export type purchase_requestsUpdateToOneWithWhereWithoutTracking_logsInput = {
 }
 
 export type purchase_requestsUpdateWithoutTracking_logsInput = {
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1438,7 +1438,7 @@ export type purchase_requestsUpdateWithoutTracking_logsInput = {
 
 export type purchase_requestsUncheckedUpdateWithoutTracking_logsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1460,7 +1460,7 @@ export type purchase_requestsUncheckedUpdateWithoutTracking_logsInput = {
 }
 
 export type purchase_requestsCreateWithoutNotificationsInput = {
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1483,7 +1483,7 @@ export type purchase_requestsCreateWithoutNotificationsInput = {
 
 export type purchase_requestsUncheckedCreateWithoutNotificationsInput = {
   id?: number
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   requested_by: number
@@ -1521,7 +1521,7 @@ export type purchase_requestsUpdateToOneWithWhereWithoutNotificationsInput = {
 }
 
 export type purchase_requestsUpdateWithoutNotificationsInput = {
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1544,7 +1544,7 @@ export type purchase_requestsUpdateWithoutNotificationsInput = {
 
 export type purchase_requestsUncheckedUpdateWithoutNotificationsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1566,7 +1566,7 @@ export type purchase_requestsUncheckedUpdateWithoutNotificationsInput = {
 }
 
 export type purchase_requestsCreateWithoutMl_classificationsInput = {
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   total_amount?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1589,7 +1589,7 @@ export type purchase_requestsCreateWithoutMl_classificationsInput = {
 
 export type purchase_requestsUncheckedCreateWithoutMl_classificationsInput = {
   id?: number
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   requested_by: number
@@ -1627,7 +1627,7 @@ export type purchase_requestsUpdateToOneWithWhereWithoutMl_classificationsInput 
 }
 
 export type purchase_requestsUpdateWithoutMl_classificationsInput = {
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1650,7 +1650,7 @@ export type purchase_requestsUpdateWithoutMl_classificationsInput = {
 
 export type purchase_requestsUncheckedUpdateWithoutMl_classificationsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1673,7 +1673,7 @@ export type purchase_requestsUncheckedUpdateWithoutMl_classificationsInput = {
 
 export type purchase_requestsCreateManyDepartmentsInput = {
   id?: number
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   requested_by: number
@@ -1690,7 +1690,7 @@ export type purchase_requestsCreateManyDepartmentsInput = {
 }
 
 export type purchase_requestsUpdateWithoutDepartmentsInput = {
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1713,7 +1713,7 @@ export type purchase_requestsUpdateWithoutDepartmentsInput = {
 
 export type purchase_requestsUncheckedUpdateWithoutDepartmentsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1736,7 +1736,7 @@ export type purchase_requestsUncheckedUpdateWithoutDepartmentsInput = {
 
 export type purchase_requestsUncheckedUpdateManyWithoutDepartmentsInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1754,7 +1754,7 @@ export type purchase_requestsUncheckedUpdateManyWithoutDepartmentsInput = {
 
 export type purchase_requestsCreateManyUsersInput = {
   id?: number
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   department_id: number
@@ -1771,7 +1771,7 @@ export type purchase_requestsCreateManyUsersInput = {
 }
 
 export type purchase_requestsUpdateWithoutUsersInput = {
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1794,7 +1794,7 @@ export type purchase_requestsUpdateWithoutUsersInput = {
 
 export type purchase_requestsUncheckedUpdateWithoutUsersInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   department_id?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1817,7 +1817,7 @@ export type purchase_requestsUncheckedUpdateWithoutUsersInput = {
 
 export type purchase_requestsUncheckedUpdateManyWithoutUsersInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   department_id?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1835,7 +1835,7 @@ export type purchase_requestsUncheckedUpdateManyWithoutUsersInput = {
 
 export type purchase_requestsCreateManyItem_categoriesInput = {
   id?: number
-  pr_number: string
+  pr_number?: string | null
   title: string
   purpose: string
   requested_by: number
@@ -1852,7 +1852,7 @@ export type purchase_requestsCreateManyItem_categoriesInput = {
 }
 
 export type purchase_requestsUpdateWithoutItem_categoriesInput = {
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   total_amount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1875,7 +1875,7 @@ export type purchase_requestsUpdateWithoutItem_categoriesInput = {
 
 export type purchase_requestsUncheckedUpdateWithoutItem_categoriesInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1898,7 +1898,7 @@ export type purchase_requestsUncheckedUpdateWithoutItem_categoriesInput = {
 
 export type purchase_requestsUncheckedUpdateManyWithoutItem_categoriesInput = {
   id?: Prisma.IntFieldUpdateOperationsInput | number
-  pr_number?: Prisma.StringFieldUpdateOperationsInput | string
+  pr_number?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   purpose?: Prisma.StringFieldUpdateOperationsInput | string
   requested_by?: Prisma.IntFieldUpdateOperationsInput | number
@@ -2057,7 +2057,7 @@ export type $purchase_requestsPayload<ExtArgs extends runtime.Types.Extensions.I
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: number
-    pr_number: string
+    pr_number: string | null
     title: string
     purpose: string
     requested_by: number

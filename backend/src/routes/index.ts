@@ -12,9 +12,12 @@ import { authMiddleware } from "../middleware/auth-middleware";
 
 export const router = Router();
 
+//no authentication required for these routes
 router.use("/auth", authRoutes);
+router.use("/departments", departmentRoutes);
+
+//NOTE: All routes below require authentication
 router.use("/users", authMiddleware, userRoutes);
-router.use("/departments", authMiddleware, departmentRoutes);
 router.use("/roles", authMiddleware, roleRoutes);
 router.use("/purchase-requests", authMiddleware, purchaseRequestRoutes);
 router.use("/approvals", authMiddleware, approvalRoutes);

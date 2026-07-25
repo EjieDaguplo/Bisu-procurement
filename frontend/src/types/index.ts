@@ -39,7 +39,7 @@ export interface LineItem {
 
 export interface PurchaseRequest {
   id: number;
-  pr_number: string;
+  pr_number: string | null;
   title: string;
   purpose: string;
   requested_by: number;
