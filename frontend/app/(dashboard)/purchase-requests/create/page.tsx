@@ -32,7 +32,7 @@ export default function CreatePRPage() {
   const [departmentId, setDeptId] = useState("");
   const [priority, setPriority] = useState<Priority>("NORMAL");
   const [dateNeeded, setDateNeeded] = useState("");
-  const [remarks, setRemarks] = useState("");
+  // const [remarks, setRemarks] = useState("");
   const [lineItems, setLineItems] = useState<LineItemForm[]>([emptyItem()]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -96,7 +96,7 @@ export default function CreatePRPage() {
         department_id: Number(departmentId),
         priority,
         date_needed: dateNeeded || null,
-        remarks: remarks || null,
+        // remarks: remarks || null,
         line_items: lineItems.map((item) => ({
           description: item.description,
           unit: item.unit,
@@ -231,7 +231,7 @@ export default function CreatePRPage() {
             </div>
 
             {/* Remarks */}
-            <div className="md:col-span-2">
+            {/* <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Remarks
               </label>
@@ -242,7 +242,7 @@ export default function CreatePRPage() {
                 onChange={(e) => setRemarks(e.target.value)}
                 placeholder="Optional remarks..."
               />
-            </div>
+            </div> */}
           </div>
         </div>
 
