@@ -306,7 +306,8 @@ export default function CreatePRPage() {
                       type="number"
                       min={1}
                       className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-bisu-blue/30 focus:border-bisu-blue transition-all"
-                      value={item.quantity}
+                      placeholder="Quantity"
+                      value={item.quantity === 0 ? "" : item.quantity}
                       onChange={(e) =>
                         updateItem(i, "quantity", Number(e.target.value))
                       }
