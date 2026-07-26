@@ -1,4 +1,3 @@
-//CHANGES
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
@@ -27,7 +26,7 @@ export const PRTable = ({ data, loading }: PRTableProps) => {
   const columns = [
     {
       key: "pr_number",
-      header: "PR Number",
+      header: "Status",
       render: (row: PurchaseRequest) =>
         row.pr_number ? (
           //Has PR number — fully approved
