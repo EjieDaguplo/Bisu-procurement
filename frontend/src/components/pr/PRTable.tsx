@@ -29,7 +29,7 @@ export const PRTable = ({ data, loading }: PRTableProps) => {
       header: "Status",
       render: (row: PurchaseRequest) =>
         row.pr_number ? (
-          //Has PR number — fully approved
+          //Has PR number - fully approved
           <span className="font-mono font-bold text-bisu-blue text-xs">
             {row.pr_number}
           </span>

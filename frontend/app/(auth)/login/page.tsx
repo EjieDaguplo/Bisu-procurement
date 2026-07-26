@@ -256,7 +256,6 @@ export default function LoginPage() {
                       type="email"
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
-                      placeholder="you@bisu.edu.ph"
                       required
                       autoComplete="email"
                       className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1A3A8F]/30 focus:border-[#1A3A8F] transition-all"
@@ -272,7 +271,6 @@ export default function LoginPage() {
                         type={showLoginPw ? "text" : "password"}
                         value={loginPw}
                         onChange={(e) => setLoginPw(e.target.value)}
-                        placeholder="••••••••"
                         required
                         autoComplete="current-password"
                         className="w-full border border-gray-200 rounded-lg px-3.5 py-2.5 pr-10 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1A3A8F]/30 focus:border-[#1A3A8F] transition-all"
@@ -385,7 +383,7 @@ export default function LoginPage() {
                             className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1A3A8F]/30 focus:border-[#1A3A8F] transition-all"
                             value={firstName}
                             onChange={(e) => setFirstName(e.target.value)}
-                            placeholder="Juan"
+                            placeholder="Enter first name"
                             required
                           />
                         </div>
@@ -397,7 +395,7 @@ export default function LoginPage() {
                             className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1A3A8F]/30 focus:border-[#1A3A8F] transition-all"
                             value={lastName}
                             onChange={(e) => setLastName(e.target.value)}
-                            placeholder="Dela Cruz"
+                            placeholder="Enter last name"
                             required
                           />
                         </div>
@@ -415,7 +413,7 @@ export default function LoginPage() {
                           className="w-full border border-gray-200 rounded-lg px-3.5 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1A3A8F]/30 focus:border-[#1A3A8F] transition-all"
                           value={employeeId}
                           onChange={(e) => setEmployeeId(e.target.value)}
-                          placeholder="BISU-2024-XXX"
+                          placeholder="Enter your employee ID"
                         />
                       </div>
 
@@ -429,7 +427,7 @@ export default function LoginPage() {
                           className="w-full border border-gray-200 rounded-lg px-3.5 py-2 text-sm text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#1A3A8F]/30 focus:border-[#1A3A8F] transition-all"
                           value={regEmail}
                           onChange={(e) => setRegEmail(e.target.value)}
-                          placeholder="you@bisu.edu.ph"
+                          placeholder="Enter your email address"
                           required
                           autoComplete="email"
                         />
