@@ -434,7 +434,7 @@ export default function LoginPage() {
                       </div>
 
                       {/* Department */}
-                      <div>
+                      {/* <div>
                         <label className="block text-xs font-semibold text-gray-600 mb-1.5">
                           Department{" "}
                           <span className="text-gray-400 font-normal">
@@ -453,7 +453,7 @@ export default function LoginPage() {
                             </option>
                           ))}
                         </select>
-                      </div>
+                      </div> */}
 
                       {/* Password */}
                       <div>
