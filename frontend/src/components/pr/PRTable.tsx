@@ -26,15 +26,15 @@ export const PRTable = ({ data, loading }: PRTableProps) => {
   const columns = [
     {
       key: "pr_number",
-      header: "Status",
+      header: "PR Number", //fixed header name
       render: (row: PurchaseRequest) =>
         row.pr_number ? (
-          //Has PR number - fully approved
+          //Has PR number fully approved, show it
           <span className="font-mono font-bold text-bisu-blue text-xs">
             {row.pr_number}
           </span>
         ) : (
-          //No PR number yet — still in approval process
+          // No PR number yet show pending badge
           <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[0.65rem] font-semibold bg-amber-100 text-amber-700 whitespace-nowrap">
             Pending Approval
           </span>
@@ -95,7 +95,47 @@ export const PRTable = ({ data, loading }: PRTableProps) => {
     {
       key: "status",
       header: "Status",
-      render: (row: PurchaseRequest) => <StatusBadge status={row.status} />,
+      render: (row: PurchaseRequest) => (
+        <div className="flex flex-col gap-1">
+          <StatusBadge status={row.status} />
+          {/*Show extra context badge based on status */}
+          {row.status === "DRAFT" && (
+            <span className="text-[0.6rem] text-gray-400 font-medium">
+              Not submitted
+            </span>
+          )}
+          {row.status === "SUBMITTED" && (
+            <span className="text-[0.6rem] text-blue-500 font-medium">
+              Awaiting Step 1
+            </span>
+          )}
+          {row.status === "UNDER_REVIEW" && (
+            <span className="text-[0.6rem] text-yellow-600 font-medium">
+              In review process
+            </span>
+          )}
+          {row.status === "APPROVED" && row.pr_number && (
+            <span className="text-[0.6rem] text-green-600 font-medium font-mono">
+              {row.pr_number}
+            </span>
+          )}
+          {row.status === "REJECTED" && (
+            <span className="text-[0.6rem] text-red-500 font-medium">
+              See remarks
+            </span>
+          )}
+          {row.status === "CANCELLED" && (
+            <span className="text-[0.6rem] text-gray-400 font-medium">
+              Cancelled by requester
+            </span>
+          )}
+          {row.status === "COMPLETED" && (
+            <span className="text-[0.6rem] text-purple-500 font-medium">
+              Process complete
+            </span>
+          )}
+        </div>
+      ),
     },
     {
       key: "created_at",

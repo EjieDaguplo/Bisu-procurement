@@ -1,18 +1,18 @@
 import React from "react";
-import { PRStatus, Priority } from "../../types";
+import { PRStatus, Priority } from "@/src/types";
 
-const statusStyles: Record<
-  PRStatus,
-  { backgroundColor: string; color: string }
-> = {
-  DRAFT: { backgroundColor: "#f3f4f6", color: "#374151" },
-  SUBMITTED: { backgroundColor: "#dbeafe", color: "#1d4ed8" },
-  UNDER_REVIEW: { backgroundColor: "#fef9c3", color: "#92400e" },
-  APPROVED: { backgroundColor: "#dcfce7", color: "#15803d" },
-  REJECTED: { backgroundColor: "#fee2e2", color: "#b91c1c" },
-  CANCELLED: { backgroundColor: "#e5e7eb", color: "#4b5563" },
-  COMPLETED: { backgroundColor: "#ede9fe", color: "#6d28d9" },
-};
+const statusStyles: Record<string, { backgroundColor: string; color: string }> =
+  {
+    DRAFT: { backgroundColor: "#f3f4f6", color: "#374151" },
+    SUBMITTED: { backgroundColor: "#dbeafe", color: "#1d4ed8" },
+    UNDER_REVIEW: { backgroundColor: "#fef9c3", color: "#92400e" },
+    APPROVED: { backgroundColor: "#dcfce7", color: "#15803d" },
+    REJECTED: { backgroundColor: "#fee2e2", color: "#b91c1c" },
+    CANCELLED: { backgroundColor: "#e5e7eb", color: "#4b5563" },
+    COMPLETED: { backgroundColor: "#ede9fe", color: "#6d28d9" },
+    //Added shown in tracking trail when an approver returns the PR
+    RETURNED: { backgroundColor: "#ffedd5", color: "#c2410c" },
+  };
 
 const priorityStyles: Record<
   Priority,
@@ -24,8 +24,11 @@ const priorityStyles: Record<
   URGENT: { backgroundColor: "#fee2e2", color: "#b91c1c" },
 };
 
-export const StatusBadge = ({ status }: { status: PRStatus }) => {
-  const s = statusStyles[status];
+export const StatusBadge = ({ status }: { status: string }) => {
+  const s = statusStyles[status] ?? {
+    backgroundColor: "#f3f4f6",
+    color: "#374151",
+  };
   return (
     <span
       style={{
