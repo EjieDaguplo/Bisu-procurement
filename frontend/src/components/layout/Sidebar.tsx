@@ -42,7 +42,8 @@ const navItems: NavItem[] = [
     label: "Approvals",
     href: "/approvals",
     icon: <CheckSquare size={18} />,
-    roles: ["APPROVER", "ADMIN"],
+    //All three roles that have approval steps can see this which is the APPROVER, PROCUREMENT_OFFICER, and ADMIN roles
+    roles: ["APPROVER", "PROCUREMENT_OFFICER", "ADMIN"],
   },
   {
     label: "Document Tracking",
@@ -80,12 +81,10 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
   const { user, logout } = useAuth();
   const [showLogout, setLogout] = useState(false);
 
-  // Auto-close drawer on route change
   useEffect(() => {
     onClose();
   }, [pathname]);
 
-  // Lock body scroll when drawer is open
   useEffect(() => {
     document.body.style.overflow = mobileOpen ? "hidden" : "";
     return () => {
@@ -99,6 +98,7 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
 
   const NavContent = () => (
     <>
+      {/* Logo */}
       <div className="flex flex-col items-center gap-2 px-6 py-6 border-b border-white/10">
         <Image
           src="/bisuLogo.png"
@@ -115,6 +115,7 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
         </div>
       </div>
 
+      {/* Nav links */}
       <nav className="flex-1 p-3 flex flex-col gap-1 overflow-y-auto overflow-x-hidden">
         {filtered.map((item) => {
           const active =
@@ -141,6 +142,7 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
         })}
       </nav>
 
+      {/* User + Sign out */}
       <div className="p-4 border-t border-white/10">
         <div className="flex items-center gap-3 mb-2">
           <div className="w-9 h-9 rounded-full bg-[#F5C400] flex items-center justify-center text-[#0F2460] font-bold text-sm shrink-0">
@@ -151,7 +153,10 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
             <p className="text-white text-sm font-medium truncate">
               {user?.first_name} {user?.last_name}
             </p>
-            <p className="text-white/50 text-xs truncate">{user?.role}</p>
+            {/* ✅ Shows full role name formatted nicely */}
+            <p className="text-white/50 text-xs truncate">
+              {user?.role?.replace(/_/g, " ")}
+            </p>
           </div>
         </div>
         <button
@@ -166,8 +171,6 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
 
   return (
     <>
-      {/*No floating hamburger here anymore — it's in Navbar now */}
-
       {/* Mobile backdrop */}
       {mobileOpen && (
         <div
