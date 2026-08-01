@@ -182,7 +182,7 @@ export default function LoginPage() {
         </p>
         <div className="mt-8 w-16 h-1 bg-[#F5C400] rounded-full" />
         <p className="text-white/60 text-sm mt-6 text-center max-w-[280px]">
-          Web-Based Procurement Management Information System
+          Web-Based Procurement Management Information Intelligent System
         </p>
       </div>
 
