@@ -12,27 +12,27 @@ const router = Router();
 
 router.get(
   "/pending",
-  requireRole("APPROVER", "PROCUREMENT_OFFICER", "ADMIN"),
+  requireRole("APPROVING_AUTHORITY", "PROCUREMENT_STAFF", "ADMIN"),
   getPendingApprovals,
 );
 router.get(
   "/pr/:prId",
-  requireRole("APPROVER", "PROCUREMENT_OFFICER", "ADMIN"),
+  requireRole("APPROVING_AUTHORITY", "PROCUREMENT_STAFF", "ADMIN"),
   getApprovalsByPR,
 );
 router.patch(
   "/:id/approve",
-  requireRole("APPROVER", "PROCUREMENT_OFFICER", "ADMIN"),
+  requireRole("APPROVING_AUTHORITY", "PROCUREMENT_STAFF", "ADMIN"),
   approvePR,
 );
 router.patch(
   "/:id/reject",
-  requireRole("APPROVER", "PROCUREMENT_OFFICER", "ADMIN"),
+  requireRole("APPROVING_AUTHORITY", "PROCUREMENT_STAFF", "ADMIN"),
   rejectPR,
 );
 router.patch(
   "/:id/return",
-  requireRole("APPROVER", "PROCUREMENT_OFFICER", "ADMIN"),
+  requireRole("APPROVING_AUTHORITY", "PROCUREMENT_STAFF", "ADMIN"),
   returnPR,
 );
 

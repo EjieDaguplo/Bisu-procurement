@@ -31,19 +31,19 @@ async function main() {
       },
     }),
     prisma.roles.upsert({
-      where: { name: "APPROVER" },
+      where: { name: "APPROVING_AUTHORITY" },
       update: {},
       create: {
-        name: "APPROVER",
+        name: "APPROVING_AUTHORITY",
         description:
           "Campus administrator / authority who approves Purchase Requests",
       },
     }),
     prisma.roles.upsert({
-      where: { name: "PROCUREMENT_OFFICER" },
+      where: { name: "PROCUREMENT_STAFF" },
       update: {},
       create: {
-        name: "PROCUREMENT_OFFICER",
+        name: "PROCUREMENT_STAFF",
         description: "Procurement staff who processes approved PRs",
       },
     }),
@@ -897,7 +897,6 @@ async function main() {
 
   // DONE
   console.log("\n🎉 Seed completed successfully!");
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
   console.log(`   Roles:              ${roles.length}`);
   console.log(`   Departments:        ${departments.length}`);
   console.log(`   Item Categories:    ${categories.length}`);
@@ -908,7 +907,6 @@ async function main() {
   console.log(`   Tracking Logs:      9`);
   console.log(`   Notifications:      7`);
   console.log(`   ML Classifications: 5`);
-  console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 }
 
 main()

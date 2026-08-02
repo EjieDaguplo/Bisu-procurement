@@ -131,9 +131,9 @@ export const MyProfileModal = ({ isOpen, onClose }: Props) => {
 
   const roleColors: Record<string, string> = {
     ADMIN: "bg-purple-100 text-purple-700",
-    APPROVER: "bg-blue-100 text-blue-700",
+    APPROVING_AUTHORITY: "bg-blue-100 text-blue-700",
     REQUESTER: "bg-green-100 text-green-700",
-    PROCUREMENT_OFFICER: "bg-yellow-100 text-yellow-800",
+    PROCUREMENT_STAFF: "bg-yellow-100 text-yellow-800",
     IT: "bg-gray-100 text-gray-700",
   };
 

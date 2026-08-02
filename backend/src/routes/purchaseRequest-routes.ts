@@ -20,7 +20,13 @@ router.get("/:id", getPRById);
 // REQUESTER + ADMIN can create
 router.post(
   "/",
-  requireRole("REQUESTER", "ADMIN", "PROCUREMENT_OFFICER", "IT", "APPROVER"),
+  requireRole(
+    "REQUESTER",
+    "ADMIN",
+    "PROCUREMENT_STAFF",
+    "IT",
+    "APPROVING_AUTHORITY",
+  ),
   createPR,
 );
 

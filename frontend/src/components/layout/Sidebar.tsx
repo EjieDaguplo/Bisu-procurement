@@ -30,32 +30,32 @@ const navItems: NavItem[] = [
     label: "Dashboard",
     href: "/dashboard",
     icon: <LayoutDashboard size={18} />,
-    roles: ["REQUESTER", "APPROVER", "PROCUREMENT_OFFICER", "ADMIN"],
+    roles: ["REQUESTER", "APPROVING_AUTHORITY", "PROCUREMENT_STAFF", "ADMIN"],
   },
   {
     label: "Purchase Requests",
     href: "/purchase-requests",
     icon: <FileText size={18} />,
-    roles: ["REQUESTER", "APPROVER", "PROCUREMENT_OFFICER", "ADMIN"],
+    roles: ["REQUESTER", "APPROVING_AUTHORITY", "PROCUREMENT_STAFF", "ADMIN"],
   },
   {
     label: "Approvals",
     href: "/approvals",
     icon: <CheckSquare size={18} />,
-    //All three roles that have approval steps can see this which is the APPROVER, PROCUREMENT_OFFICER, and ADMIN roles
-    roles: ["APPROVER", "PROCUREMENT_OFFICER", "ADMIN"],
+    //All three roles that have approval steps can see this which is the APPROVING_AUTHORITY, PROCUREMENT_STAFF, and ADMIN roles
+    roles: ["APPROVING_AUTHORITY", "PROCUREMENT_STAFF", "ADMIN"],
   },
   {
     label: "Document Tracking",
     href: "/tracking",
     icon: <MapPin size={18} />,
-    roles: ["REQUESTER", "APPROVER", "PROCUREMENT_OFFICER", "ADMIN"],
+    roles: ["REQUESTER", "APPROVING_AUTHORITY", "PROCUREMENT_STAFF", "ADMIN"],
   },
   {
     label: "Reports",
     href: "/reports",
     icon: <BarChart2 size={18} />,
-    roles: ["PROCUREMENT_OFFICER", "ADMIN"],
+    roles: ["PROCUREMENT_STAFF", "ADMIN"],
   },
   {
     label: "Users",
@@ -67,7 +67,7 @@ const navItems: NavItem[] = [
     label: "Notifications",
     href: "/notifications",
     icon: <Bell size={18} />,
-    roles: ["REQUESTER", "APPROVER", "PROCUREMENT_OFFICER", "ADMIN"],
+    roles: ["REQUESTER", "APPROVING_AUTHORITY", "PROCUREMENT_STAFF", "ADMIN"],
   },
 ];
 
@@ -153,7 +153,7 @@ export const Sidebar = ({ mobileOpen, onClose }: SidebarProps) => {
             <p className="text-white text-sm font-medium truncate">
               {user?.first_name} {user?.last_name}
             </p>
-            {/* ✅ Shows full role name formatted nicely */}
+            {/*Shows full role name formatted nicely */}
             <p className="text-white/50 text-xs truncate">
               {user?.role?.replace(/_/g, " ")}
             </p>
